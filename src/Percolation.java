@@ -12,7 +12,11 @@ public class Percolation {
     public Percolation(int n) {
         if (n <= 0) throw new IllegalArgumentException();
         data = new int[n][n];
-        union = new WeightedQuickUnionUF(n*n);
+        union = new WeightedQuickUnionUF(n * n + 2);
+        for (int i = 0; i < n; i++) {
+            union.union(i, n * n);
+            union.union(n * n - i - 1, n * n + 1);
+        }
     }
 
     private boolean indexesOutOfBounds(int row, int col) {
@@ -20,7 +24,7 @@ public class Percolation {
     }
 
     private void validate(int row, int col) {
-        if (indexesOutOfBounds(row, col)) throw new IndexOutOfBoundsException();
+        if (indexesOutOfBounds(row, col)) throw new IndexOutOfBoundsException("row = " + row + "; col = " + col);
     }
 
     public void open(int row, int col) {
@@ -55,13 +59,6 @@ public class Percolation {
     }
 
     public boolean percolates() {
-        for (int i = 1; i <= data.length; i++) {
-            for (int j = 1; j <= data.length; j++) {
-                if (union.connected(getIndex(1, i), getIndex(data.length, j))) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return union.connected(data.length*data.length, data.length*data.length + 1);
     }
 }
