@@ -2,8 +2,7 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
 
-    private static final int[][] shift = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-    private static final int FULL = 0;
+    private static final int[][] SHIFT = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
     private static final int OPEN = 1;
     private int[][] data;
     private int openPoints = 0;
@@ -31,9 +30,9 @@ public class Percolation {
         if (!isOpen(row, col)) {
             data[row-1][col-1] = OPEN;
             openPoints++;
-            for (int i = 0; i < shift.length; i++) {
-                int shiftRow = row + shift[i][0];
-                int shiftColumn = col + shift[i][1];
+            for (int i = 0; i < SHIFT.length; i++) {
+                int shiftRow = row + SHIFT[i][0];
+                int shiftColumn = col + SHIFT[i][1];
                 if (!indexesOutOfBounds(shiftRow, shiftColumn) && isOpen(shiftRow, shiftColumn))
                     union.union(getIndex(row, col), getIndex(shiftRow, shiftColumn));
             }
@@ -50,8 +49,7 @@ public class Percolation {
     }
 
     public boolean isFull(int row, int col) {
-        validate(row, col);
-        return data[row-1][col-1] == FULL;
+        return isOpen(row, col) && union.connected(getIndex(row, col), data.length * data.length);
     }
 
     public int numberOfOpenSites() {
@@ -59,6 +57,7 @@ public class Percolation {
     }
 
     public boolean percolates() {
+        // TODO check if top line isOpened
         return union.connected(data.length*data.length, data.length*data.length + 1);
     }
 }

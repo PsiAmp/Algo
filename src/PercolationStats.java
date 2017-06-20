@@ -4,7 +4,7 @@ import edu.princeton.cs.algs4.StdStats;
 
 public class PercolationStats {
 
-    private double openSites[];
+    private double[] openSites;
     private int trials;
 
     // perform trials independent experiments on an n-by-n grid
@@ -21,7 +21,7 @@ public class PercolationStats {
             while (!percolation.percolates()) {
                 int row = indexes[openCount] / n;
                 int col = Math.max(0, indexes[openCount] % n);
-                percolation.open( row + 1,  col + 1);
+                percolation.open(row + 1, col + 1);
                 openCount++;
             }
             openSites[i] = 1.0 * openCount / (n * n);
@@ -54,6 +54,9 @@ public class PercolationStats {
         PercolationStats percolationStats = new PercolationStats(Integer.valueOf(args[0]), Integer.valueOf(args[1]));
         StdOut.println("mean = " + percolationStats.mean());
         StdOut.println("stddev = " + percolationStats.stddev());
-        StdOut.println("95% confidence interval = [" + percolationStats.confidenceLo() + "], [" + percolationStats.confidenceHi() + "]");
+        StdOut.println("95% confidence interval = ["
+                + percolationStats.confidenceLo()
+                + "], [" + percolationStats.confidenceHi()
+                + "]");
     }
 }
