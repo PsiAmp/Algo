@@ -25,7 +25,6 @@ public class PercolationStats {
                 openCount++;
             }
             openSites[i] = 1.0 * openCount / (n * n);
-            StdOut.println(openCount);
         }
     }
 
@@ -51,7 +50,7 @@ public class PercolationStats {
 
     // test client (described below)
     public static void main(String[] args) {
-        PercolationStats percolationStats = new PercolationStats(Integer.valueOf(args[0]), Integer.valueOf(args[1]));
+        PercolationStats percolationStats = new PercolationStats(Integer.parseInt(args[0]), Integer.parseInt(args[1]));
         StdOut.println("mean = " + percolationStats.mean());
         StdOut.println("stddev = " + percolationStats.stddev());
         StdOut.println("95% confidence interval = ["
