@@ -7,13 +7,16 @@ public class Percolation {
     private int[][] data;
     private int openPoints = 0;
     private WeightedQuickUnionUF union;
+    private WeightedQuickUnionUF fullUnion;
 
     public Percolation(int n) {
         if (n <= 0) throw new IllegalArgumentException();
         data = new int[n][n];
         union = new WeightedQuickUnionUF(n * n + 2);
+        fullUnion = new WeightedQuickUnionUF(n * n + 1);
         for (int i = 0; i < n; i++) {
             union.union(i, n * n);
+            fullUnion.union(i, n * n);
             union.union(n * n - i - 1, n * n + 1);
         }
     }
@@ -33,8 +36,10 @@ public class Percolation {
             for (int i = 0; i < SHIFT.length; i++) {
                 int shiftRow = row + SHIFT[i][0];
                 int shiftColumn = col + SHIFT[i][1];
-                if (!indexesOutOfBounds(shiftRow, shiftColumn) && isOpen(shiftRow, shiftColumn))
+                if (!indexesOutOfBounds(shiftRow, shiftColumn) && isOpen(shiftRow, shiftColumn)) {
                     union.union(getIndex(row, col), getIndex(shiftRow, shiftColumn));
+                    fullUnion.union(getIndex(row, col), getIndex(shiftRow, shiftColumn));
+                }
             }
         }
     }
@@ -49,7 +54,7 @@ public class Percolation {
     }
 
     public boolean isFull(int row, int col) {
-        return isOpen(row, col) && union.connected(getIndex(row, col), data.length * data.length);
+        return isOpen(row, col) && fullUnion.connected(getIndex(row, col), data.length * data.length);
     }
 
     public int numberOfOpenSites() {
@@ -57,7 +62,7 @@ public class Percolation {
     }
 
     public boolean percolates() {
-        // TODO check if top line isOpened
+        if (data.length == 1) return numberOfOpenSites() > 0;
         return union.connected(data.length*data.length, data.length*data.length + 1);
     }
 }
