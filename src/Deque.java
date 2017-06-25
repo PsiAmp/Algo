@@ -10,15 +10,19 @@ public class Deque<E> implements Iterable<E> {
     private Node<E> last = null;
     private int size = 0;
 
-    private class Node<T> {
-        public Node(Node<T> prev, T item, Node<T> next) {
+    private class Node<E> {
+        public Node(Node<E> prev, E item, Node<E> next) {
             this.prev = prev;
             this.item = item;
             this.next = next;
         }
-        Node<T> prev;
-        Node<T> next;
-        T item;
+        Node<E> prev;
+        Node<E> next;
+        E item;
+    }
+
+    private class DequeIterator<E> {
+
     }
 
     /**
