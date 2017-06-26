@@ -6,23 +6,48 @@ import java.util.NoSuchElementException;
  */
 public class Deque<E> implements Iterable<E> {
 
-    private Node<E> first = null;
-    private Node<E> last = null;
+    private Node first = null;
+    private Node last = null;
     private int size = 0;
 
-    private class Node<E> {
-        public Node(Node<E> prev, E item, Node<E> next) {
+    private class Node {
+        Node prev;
+        Node next;
+        E item;
+
+        public Node(Node prev, E item, Node next) {
             this.prev = prev;
             this.item = item;
             this.next = next;
         }
-        Node<E> prev;
-        Node<E> next;
-        E item;
     }
 
-    private class DequeIterator<E> {
+    private class DequeIterator implements Iterator {
 
+        private Node node;
+
+        public DequeIterator(Node node) {
+            this.node = node;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return node != null;
+        }
+
+        @Override
+        public E next() {
+            if (!hasNext())  throw new NoSuchElementException();
+
+            E item = node.item;
+            node = node.next;
+            return item;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     /**
@@ -52,7 +77,7 @@ public class Deque<E> implements Iterable<E> {
      */
     public void addFirst(E item) {
         if (item == null) throw new IllegalArgumentException();
-        Node<E> node = new Node<>(first, item, null);
+        Node node = new Node(first, item, null);
         if (isEmpty()) {
             last = node;
         } else {
@@ -68,7 +93,7 @@ public class Deque<E> implements Iterable<E> {
      */
     public void addLast(E item) {
         if (item == null) throw new IllegalArgumentException();
-        Node<E> node = new Node<>(null, item, last);
+        Node node = new Node(null, item, last);
         if (isEmpty()) {
             first = node;
         } else {
@@ -113,7 +138,7 @@ public class Deque<E> implements Iterable<E> {
      * @return
      */
     public Iterator<E> iterator() {
-        return null;
+        return new DequeIterator(last);
     }
 
     public static void main(String[] args) {
@@ -126,14 +151,19 @@ public class Deque<E> implements Iterable<E> {
             }
         }
 
-        int i = 0;
-        while (integerDeque.size > 0) {
-            i++;
-            if (i % 2 == 0) {
-                System.out.println(integerDeque.removeFirst());
-            } else {
-                System.out.println(integerDeque.removeLast());
-            }
+//        int i = 0;
+//        while (integerDeque.size > 0) {
+//            i++;
+//            if (i % 2 == 0) {
+//                System.out.println(integerDeque.removeFirst());
+//            } else {
+//                System.out.println(integerDeque.removeLast());
+//            }
+//        }
+
+        Iterator<Integer> iterator = integerDeque.iterator();
+        while (iterator.hasNext()) {
+            System.out.println("== " + iterator.next());
         }
     }
 
