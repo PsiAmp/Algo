@@ -1,9 +1,25 @@
+import edu.princeton.cs.algs4.StdRandom;
+
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Created by Kostiantyn Kostin on 24.06.2017.
  */
 public class RandomizedQueue<E> {
+
+    private int size = 0;
+    private Node last;
+
+    private class Node {
+        Node next;
+        E item;
+
+        public Node(Node next, E item) {
+            this.next = next;
+            this.item = item;
+        }
+    }
 
     /**
      *  construct an empty randomized queue
@@ -17,7 +33,7 @@ public class RandomizedQueue<E> {
      * @return
      */
     public boolean isEmpty() {
-        return false;
+        return size() == 0;
     }
 
     /**
@@ -25,7 +41,7 @@ public class RandomizedQueue<E> {
      * @return
      */
     public int size() {
-        return 0;
+        return size;
     }
 
     /**
@@ -33,27 +49,48 @@ public class RandomizedQueue<E> {
      * @param item
      */
     public void enqueue(E item) {
-
+        if (item == null) throw new IllegalArgumentException();
+        Node node = new Node(last, item);
+        last = node;
+        size++;
     }
 
     /**
-     * remove and return a random item
+     * Remove and return a random item
      * @return
      */
     public E dequeue() {
-        return null;
+        if (isEmpty()) throw new NoSuchElementException();
+        int index = (int) (StdRandom.uniform() * size);
+        Node node = last;
+        Node prev = null;
+        while (index > 0) {
+            prev = node;
+            node = node.next;
+            index--;
+        }
+        prev.next = node.next;
+        size--;
+        return node.item;
     }
 
     /**
-     * return (but do not remove) a random item
+     * Return (but do not remove) a random item
      * @return
      */
     public E sample() {
-        return null;
+        if (isEmpty()) throw new NoSuchElementException();
+        int index = (int) (StdRandom.uniform() * size);
+        Node node = last;
+        while (index > 0) {
+            node = node.next;
+            index--;
+        }
+        return node.item;
     }
 
     /**
-     * return an independent iterator over items in random order
+     * Return an independent iterator over items in random order
      * @return
      */
     public Iterator<E> iterator() {
@@ -61,6 +98,23 @@ public class RandomizedQueue<E> {
     }
 
     public static void main(String[] args) {
+        RandomizedQueue<Integer> randomizedQueue = new RandomizedQueue();
+        for (int i = 0; i < 10; i++) {
+            randomizedQueue.enqueue(i);
+        }
 
+        int[] stats = new int[10];
+        for (int i = 0; i < 10000; i++) {
+            //System.out.println("rnd = " + randomizedQueue.sample());
+            stats[randomizedQueue.sample()]++;
+        }
+
+        for (int i = 0; i < stats.length; i++) {
+            System.out.println(stats[i]);
+        }
+
+//        while (!randomizedQueue.isEmpty()) {
+//            System.out.println(randomizedQueue.dequeue());
+//        }
     }
 }
