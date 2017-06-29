@@ -6,9 +6,9 @@ import java.util.NoSuchElementException;
 /**
  * Created by Kostiantyn Kostin on 24.06.2017.
  */
-public class RandomizedQueue<E> extends Deque<E> {
+public class RandomizedQueue<Item> extends Deque<Item> {
 
-    private class RandomizedIterator implements Iterator {
+    private class RandomizedIterator implements Iterator<Item> {
 
         private int[] randIndexes;
         private int index = 0;
@@ -27,7 +27,7 @@ public class RandomizedQueue<E> extends Deque<E> {
         }
 
         @Override
-        public E next() {
+        public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
             return getNode(randIndexes[index++]).item;
         }
@@ -47,7 +47,7 @@ public class RandomizedQueue<E> extends Deque<E> {
      * Add the item
      * @param item
      */
-    public void enqueue(E item) {
+    public void enqueue(Item item) {
         addLast(item);
     }
 
@@ -55,10 +55,10 @@ public class RandomizedQueue<E> extends Deque<E> {
      * Remove and return a random item
      * @return
      */
-    public E dequeue() {
+    public Item dequeue() {
         Node node = getRandomNode();
         size--;
-        if (size > 0) {
+        if (size() > 0) {
             Node nextNode = node.next;
             Node prevNode = node.prev;
 
@@ -85,12 +85,12 @@ public class RandomizedQueue<E> extends Deque<E> {
      * Return (but do not remove) a random item
      * @return
      */
-    public E sample() {
+    public Item sample() {
         return getRandomNode().item;
     }
 
     private Node getRandomNode() {
-        return getNode((int) (StdRandom.uniform() * size));
+        return getNode((int) (StdRandom.uniform() * size()));
     }
 
     private Node getNode(int index) {
@@ -107,7 +107,7 @@ public class RandomizedQueue<E> extends Deque<E> {
      * Return an independent iterator over items in random order
      * @return
      */
-    public Iterator<E> iterator() {
+    public Iterator<Item> iterator() {
         return new RandomizedIterator();
     }
 
