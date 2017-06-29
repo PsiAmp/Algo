@@ -6,53 +6,19 @@ import java.util.NoSuchElementException;
 /**
  * Created by Kostiantyn Kostin on 24.06.2017.
  */
-public class RandomizedQueue<E> {
-
-    private int size = 0;
-    private Node last;
-
-    private class Node {
-        Node next;
-        E item;
-
-        public Node(Node next, E item) {
-            this.next = next;
-            this.item = item;
-        }
-    }
+public class RandomizedQueue<E> extends Deque<E> {
 
     /**
-     *  construct an empty randomized queue
+     *  Construct an empty randomized queue
      */
-    public RandomizedQueue() {
-
-    }
+    public RandomizedQueue() {}
 
     /**
-     * is the queue empty?
-     * @return
-     */
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
-    /**
-     * return the number of items on the queue
-     * @return
-     */
-    public int size() {
-        return size;
-    }
-
-    /**
-     * add the item
+     * Add the item
      * @param item
      */
     public void enqueue(E item) {
-        if (item == null) throw new IllegalArgumentException();
-        Node node = new Node(last, item);
-        last = node;
-        size++;
+        addLast(item);
     }
 
     /**
@@ -60,17 +26,20 @@ public class RandomizedQueue<E> {
      * @return
      */
     public E dequeue() {
-        if (isEmpty()) throw new NoSuchElementException();
-        int index = (int) (StdRandom.uniform() * size);
-        Node node = last;
-        Node prev = null;
-        while (index > 0) {
-            prev = node;
-            node = node.next;
-            index--;
-        }
-        prev.next = node.next;
+        Node node = getRandomNode();
         size--;
+        if (size > 0) {
+            if (node.next != null) {
+                node.next.prev = node.prev;
+            } else {
+
+            }
+        } else {
+            first = null;
+            last = null;
+        }
+
+        // TODO return RANDOM item!!!!
         return node.item;
     }
 
@@ -79,6 +48,10 @@ public class RandomizedQueue<E> {
      * @return
      */
     public E sample() {
+        return getRandomNode().item;
+    }
+
+    private Node getRandomNode() {
         if (isEmpty()) throw new NoSuchElementException();
         int index = (int) (StdRandom.uniform() * size);
         Node node = last;
@@ -86,7 +59,7 @@ public class RandomizedQueue<E> {
             node = node.next;
             index--;
         }
-        return node.item;
+        return node;
     }
 
     /**

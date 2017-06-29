@@ -6,11 +6,11 @@ import java.util.NoSuchElementException;
  */
 public class Deque<E> implements Iterable<E> {
 
-    private Node first = null;
-    private Node last = null;
-    private int size = 0;
+    protected Node first = null;
+    protected Node last = null;
+    protected int size = 0;
 
-    private class Node {
+    protected class Node {
         Node prev;
         Node next;
         E item;
@@ -22,7 +22,7 @@ public class Deque<E> implements Iterable<E> {
         }
     }
 
-    private class DequeIterator implements Iterator {
+    protected class DequeIterator implements Iterator {
 
         private Node node;
 
