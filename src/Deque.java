@@ -40,7 +40,7 @@ public class Deque<Item> implements Iterable<Item> {
             if (!hasNext()) throw new NoSuchElementException();
 
             Item item = node.item;
-            node = node.next;
+            node = node.prev;
             return item;
         }
 
@@ -138,7 +138,7 @@ public class Deque<Item> implements Iterable<Item> {
      * @return
      */
     public Iterator<Item> iterator() {
-        return new DequeIterator(last);
+        return new DequeIterator(first);
     }
 
     public static void main(String[] args) {
@@ -147,7 +147,7 @@ public class Deque<Item> implements Iterable<Item> {
             if (i%2 == 0) {
                 integerDeque.addFirst(i);
             } else {
-                integerDeque.addLast(i);
+                integerDeque.addFirst(i);
             }
         }
 
