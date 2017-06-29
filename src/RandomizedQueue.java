@@ -8,6 +8,36 @@ import java.util.NoSuchElementException;
  */
 public class RandomizedQueue<E> extends Deque<E> {
 
+    private class RandomizedIterator implements Iterator {
+
+        private int[] randIndexes;
+        private int index = 0;
+
+        public RandomizedIterator() {
+            randIndexes = new int[size()];
+            for (int i = 0; i < randIndexes.length; i++) {
+                randIndexes[i] = i;
+            }
+            StdRandom.shuffle(randIndexes);
+        }
+
+        @Override
+        public boolean hasNext() {
+            return index < randIndexes.length;
+        }
+
+        @Override
+        public E next() {
+            if (!hasNext()) throw new NoSuchElementException();
+            return getNode(randIndexes[index++]).item;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     /**
      *  Construct an empty randomized queue
      */
@@ -29,17 +59,25 @@ public class RandomizedQueue<E> extends Deque<E> {
         Node node = getRandomNode();
         size--;
         if (size > 0) {
-            if (node.next != null) {
-                node.next.prev = node.prev;
-            } else {
+            Node nextNode = node.next;
+            Node prevNode = node.prev;
 
+            if (nextNode != null) {
+                nextNode.prev = prevNode;
+            } else {
+                first = prevNode;
+            }
+
+            if (prevNode != null) {
+                prevNode.next = nextNode;
+            } else {
+                last = nextNode;
             }
         } else {
             first = null;
             last = null;
         }
 
-        // TODO return RANDOM item!!!!
         return node.item;
     }
 
@@ -52,8 +90,11 @@ public class RandomizedQueue<E> extends Deque<E> {
     }
 
     private Node getRandomNode() {
+        return getNode((int) (StdRandom.uniform() * size));
+    }
+
+    private Node getNode(int index) {
         if (isEmpty()) throw new NoSuchElementException();
-        int index = (int) (StdRandom.uniform() * size);
         Node node = last;
         while (index > 0) {
             node = node.next;
@@ -67,7 +108,7 @@ public class RandomizedQueue<E> extends Deque<E> {
      * @return
      */
     public Iterator<E> iterator() {
-        return null;
+        return new RandomizedIterator();
     }
 
     public static void main(String[] args) {
@@ -86,8 +127,8 @@ public class RandomizedQueue<E> extends Deque<E> {
             System.out.println(stats[i]);
         }
 
-//        while (!randomizedQueue.isEmpty()) {
-//            System.out.println(randomizedQueue.dequeue());
-//        }
+        while (!randomizedQueue.isEmpty()) {
+            System.out.println(randomizedQueue.dequeue());
+        }
     }
 }

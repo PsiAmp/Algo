@@ -37,7 +37,7 @@ public class Deque<E> implements Iterable<E> {
 
         @Override
         public E next() {
-            if (!hasNext())  throw new NoSuchElementException();
+            if (!hasNext()) throw new NoSuchElementException();
 
             E item = node.item;
             node = node.next;
