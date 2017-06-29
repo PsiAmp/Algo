@@ -6,7 +6,23 @@ import java.util.NoSuchElementException;
 /**
  * Created by Kostiantyn Kostin on 24.06.2017.
  */
-public class RandomizedQueue<Item> extends Deque<Item> {
+public class RandomizedQueue<Item> implements Iterable<Item> {
+
+    private Node first = null;
+    private Node last = null;
+    private int size = 0;
+
+    private class Node {
+        Node prev;
+        Node next;
+        Item item;
+
+        public Node(Node prev, Item item, Node next) {
+            this.prev = prev;
+            this.item = item;
+            this.next = next;
+        }
+    }
 
     private class RandomizedIterator implements Iterator<Item> {
 
@@ -14,7 +30,7 @@ public class RandomizedQueue<Item> extends Deque<Item> {
         private int index = 0;
 
         public RandomizedIterator() {
-            randIndexes = new int[size()];
+            randIndexes = new int[size];
             for (int i = 0; i < randIndexes.length; i++) {
                 randIndexes[i] = i;
             }
@@ -43,12 +59,40 @@ public class RandomizedQueue<Item> extends Deque<Item> {
      */
     public RandomizedQueue() {}
 
+    public int size() {
+        return size;
+    }
+
+    /**
+     * Is the deque empty?
+     * @return
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
     /**
      * Add the item
      * @param item
      */
     public void enqueue(Item item) {
         addLast(item);
+    }
+
+    /**
+     * add the item to the end
+     * @param item
+     */
+    private void addLast(Item item) {
+        if (item == null) throw new IllegalArgumentException();
+        Node node = new Node(null, item, last);
+        if (isEmpty()) {
+            first = node;
+        } else {
+            last.prev = node;
+        }
+        last = node;
+        size++;
     }
 
     /**
@@ -112,7 +156,7 @@ public class RandomizedQueue<Item> extends Deque<Item> {
     }
 
     public static void main(String[] args) {
-        RandomizedQueue<Integer> randomizedQueue = new RandomizedQueue();
+        RandomizedQueue<Integer> randomizedQueue = new RandomizedQueue<Integer>();
         for (int i = 0; i < 10; i++) {
             randomizedQueue.enqueue(i);
         }

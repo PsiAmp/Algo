@@ -10,7 +10,7 @@ public class Deque<Item> implements Iterable<Item> {
     private Node last = null;
     private int size = 0;
 
-    protected class Node {
+    private class Node {
         Node prev;
         Node next;
         Item item;
@@ -22,7 +22,7 @@ public class Deque<Item> implements Iterable<Item> {
         }
     }
 
-    protected class DequeIterator implements Iterator<Item> {
+    private class DequeIterator implements Iterator<Item> {
 
         private Node node;
 
