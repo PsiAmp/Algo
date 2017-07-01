@@ -14,13 +14,15 @@ public class Permutation {
 
         while (!StdIn.isEmpty()) {
             String s = StdIn.readString();
-            queue.enqueue(s);
+            if (k > 0) {
+                queue.enqueue(s);
+                k--;
+            }
         }
 
         Iterator<String> iterator = queue.iterator();
-        while (k > 0) {
+        while (iterator.hasNext()) {
             StdOut.println(iterator.next());
-            k--;
         }
     }
 }

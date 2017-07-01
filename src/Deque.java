@@ -109,9 +109,17 @@ public class Deque<Item> implements Iterable<Item> {
      */
     public Item removeFirst() {
         if (isEmpty()) throw new NoSuchElementException();
-        Item item = first.item;
-        first = first.prev;
-        if (first != null) {
+        final Item item = first.item;
+        final Node prev = first.prev;
+
+        // Help GC
+        first.item = null;
+        first.prev = null;
+
+        first = prev;
+        if (first == null) {
+            last = null;
+        } else {
             first.next = null;
         }
         size--;
@@ -124,9 +132,17 @@ public class Deque<Item> implements Iterable<Item> {
      */
     public Item removeLast() {
         if (isEmpty()) throw new NoSuchElementException();
-        Item item = last.item;
-        last = last.next;
-        if (last != null) {
+        final Item item = last.item;
+        final Node next = last.next;
+
+        // Help GC
+        last.item = null;
+        last.next = null;
+
+        last = next;
+        if (last == null) {
+            first = null;
+        } else {
             last.prev = null;
         }
         size--;
@@ -143,13 +159,25 @@ public class Deque<Item> implements Iterable<Item> {
 
     public static void main(String[] args) {
         Deque<Integer> integerDeque = new Deque<Integer>();
-        for (int i = 0; i < 10; i++) {
-            if (i%2 == 0) {
-                integerDeque.addFirst(i);
-            } else {
-                integerDeque.addFirst(i);
-            }
-        }
+
+        integerDeque.addLast(1);
+        integerDeque.addFirst(2);
+        integerDeque.removeFirst();
+        integerDeque.addLast(4);
+        integerDeque.removeFirst();
+        integerDeque.removeFirst();
+        integerDeque.addFirst(7);
+        integerDeque.removeLast();
+
+        integerDeque.iterator();
+
+//        for (int i = 0; i < 10; i++) {
+//            if (i%2 == 0) {
+//                integerDeque.addFirst(i);
+//            } else {
+//                integerDeque.addFirst(i);
+//            }
+//        }
 
 //        int i = 0;
 //        while (integerDeque.size > 0) {
@@ -160,11 +188,11 @@ public class Deque<Item> implements Iterable<Item> {
 //                System.out.println(integerDeque.removeLast());
 //            }
 //        }
-
-        Iterator<Integer> iterator = integerDeque.iterator();
-        while (iterator.hasNext()) {
-            System.out.println("== " + iterator.next());
-        }
+//
+//        Iterator<Integer> iterator = integerDeque.iterator();
+//        while (iterator.hasNext()) {
+//            System.out.println("== " + iterator.next());
+//        }
     }
 
 }

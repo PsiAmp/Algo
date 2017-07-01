@@ -8,21 +8,8 @@ import java.util.NoSuchElementException;
  */
 public class RandomizedQueue<Item> implements Iterable<Item> {
 
-    private Node first = null;
-    private Node last = null;
     private int size = 0;
-
-    private class Node {
-        Node prev;
-        Node next;
-        Item item;
-
-        public Node(Node prev, Item item, Node next) {
-            this.prev = prev;
-            this.item = item;
-            this.next = next;
-        }
-    }
+    private Item[] items;
 
     private class RandomizedIterator implements Iterator<Item> {
 
@@ -45,7 +32,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         @Override
         public Item next() {
             if (!hasNext()) throw new NoSuchElementException();
-            return getNode(randIndexes[index++]).item;
+            return items[randIndexes[index++]];
         }
 
         @Override
@@ -57,7 +44,9 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     /**
      *  Construct an empty randomized queue
      */
-    public RandomizedQueue() {}
+    public RandomizedQueue() {
+        items = (Item[]) new Object[2];
+    }
 
     public int size() {
         return size;
@@ -71,28 +60,31 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         return size() == 0;
     }
 
+    private void resize(int capacity) {
+        Item[] resizedItems = (Item[]) new Object[capacity];
+
+        for (int i = 0; i < size(); i++) {
+            resizedItems[i] = items[i];
+        }
+        // Help GC
+        items = null;
+        items = resizedItems;
+
+        // Alternative could be not supported by Algorithms course design specification
+        // System.arraycopy(items, 0, resizedItems, 0, size());
+    }
+
     /**
      * Add the item
      * @param item
      */
     public void enqueue(Item item) {
-        addLast(item);
-    }
-
-    /**
-     * add the item to the end
-     * @param item
-     */
-    private void addLast(Item item) {
         if (item == null) throw new IllegalArgumentException();
-        Node node = new Node(null, item, last);
-        if (isEmpty()) {
-            first = node;
-        } else {
-            last.prev = node;
+        if (size() == items.length) {
+            // double the size
+            resize(items.length * 2);
         }
-        last = node;
-        size++;
+        items[size++] = item;
     }
 
     /**
@@ -100,29 +92,22 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
      * @return
      */
     public Item dequeue() {
-        Node node = getRandomNode();
-        size--;
-        if (size() > 0) {
-            Node nextNode = node.next;
-            Node prevNode = node.prev;
+        if (isEmpty()) throw new NoSuchElementException();
+        int randomIndex = StdRandom.uniform(size());
+        final Item item = items[randomIndex];
 
-            if (nextNode != null) {
-                nextNode.prev = prevNode;
-            } else {
-                first = prevNode;
-            }
-
-            if (prevNode != null) {
-                prevNode.next = nextNode;
-            } else {
-                last = nextNode;
-            }
-        } else {
-            first = null;
-            last = null;
+        for (int i = randomIndex + 1; i < size(); i++) {
+            items[i-1] = items[i];
         }
+        items[size()-1] = null;
 
-        return node.item;
+        size--;
+
+        // Half the size when 1/4th array is full to avoid threshing
+        if (size() > 0 && size() == items.length / 4) {
+            resize(items.length / 2);
+        }
+        return item;
     }
 
     /**
@@ -130,21 +115,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
      * @return
      */
     public Item sample() {
-        return getRandomNode().item;
-    }
-
-    private Node getRandomNode() {
-        return getNode((int) (StdRandom.uniform() * size()));
-    }
-
-    private Node getNode(int index) {
         if (isEmpty()) throw new NoSuchElementException();
-        Node node = last;
-        while (index > 0) {
-            node = node.next;
-            index--;
-        }
-        return node;
+        return items[StdRandom.uniform(size())];
     }
 
     /**
@@ -157,22 +129,24 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     public static void main(String[] args) {
         RandomizedQueue<Integer> randomizedQueue = new RandomizedQueue<Integer>();
-        for (int i = 0; i < 10; i++) {
-            randomizedQueue.enqueue(i);
+
+        for (int i = 1; i < 1000; i++) {
+            if (i % 8 == StdRandom.uniform(8)) {
+                if (!randomizedQueue.isEmpty())
+                    randomizedQueue.dequeue();
+            } else {
+                randomizedQueue.enqueue(StdRandom.uniform(1000));
+            }
         }
 
-        int[] stats = new int[10];
-        for (int i = 0; i < 10000; i++) {
-            //System.out.println("rnd = " + randomizedQueue.sample());
-            stats[randomizedQueue.sample()]++;
+        for (int i = 0; i < 1000; i++) {
+            if (i % 8 == StdRandom.uniform(8)) {
+                randomizedQueue.enqueue(StdRandom.uniform(1000));
+            } else {
+                if (!randomizedQueue.isEmpty())
+                    randomizedQueue.dequeue();
+            }
         }
-
-        for (int i = 0; i < stats.length; i++) {
-            System.out.println(stats[i]);
-        }
-
-        while (!randomizedQueue.isEmpty()) {
-            System.out.println(randomizedQueue.dequeue());
-        }
+        randomizedQueue.isEmpty();
     }
 }
