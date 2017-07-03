@@ -26,8 +26,8 @@ public class Deque<Item> implements Iterable<Item> {
 
         private Node node;
 
-        public DequeIterator(Node node) {
-            this.node = node;
+        public DequeIterator() {
+            this.node = first;
         }
 
         @Override
@@ -154,7 +154,7 @@ public class Deque<Item> implements Iterable<Item> {
      * @return
      */
     public Iterator<Item> iterator() {
-        return new DequeIterator(first);
+        return new DequeIterator();
     }
 
     public static void main(String[] args) {
