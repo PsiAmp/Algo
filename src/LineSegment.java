@@ -64,4 +64,17 @@ public class LineSegment {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        LineSegment lineSegment = (LineSegment) obj;
+        return this.getP().equals(lineSegment.getP()) && this.getQ().equals(lineSegment.getQ());
+    }
+
+    public Point getP() {
+        return p;
+    }
+
+    public Point getQ() {
+        return q;
+    }
 }

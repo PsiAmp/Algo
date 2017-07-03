@@ -15,7 +15,7 @@ public class FastCollinearPoints {
      * @return
      */
     public  int numberOfSegments() {
-
+        return 0;
     }
 
     /**
@@ -23,6 +23,6 @@ public class FastCollinearPoints {
      * @return
      */
     public LineSegment[] segments() {
-
+        return null;
     }
 }
