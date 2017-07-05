@@ -18,12 +18,8 @@ public class Point implements Comparable<Point> {
 
     private final int x;     // x-coordinate of this point
     private final int y;     // y-coordinate of this point
-    private double slope;
 
-    private SlopeComparator comparator = new SlopeComparator();
-
-    private class SlopeComparator implements Comparator<Point> {
-
+    private class SlopeOrder implements Comparator<Point> {
         @Override
         public int compare(Point point1, Point point2) {
             double slopeP1 = slopeTo(point1);
@@ -80,8 +76,7 @@ public class Point implements Comparable<Point> {
         if (x == that.x && y == that.y) return Double.NEGATIVE_INFINITY;
         if (x == that.x) return Double.POSITIVE_INFINITY;
         if (y == that.y) return +0.0d;
-        slope = ((double) that.y - y) / ((double) that.x - x);
-        return slope;
+        return ((double) that.y - y) / ((double) that.x - x);
     }
 
     /**
@@ -111,9 +106,8 @@ public class Point implements Comparable<Point> {
      * @return the Comparator that defines this ordering on points
      */
     public Comparator<Point> slopeOrder() {
-        return comparator;
+        return new SlopeOrder();
     }
-
 
     /**
      * Returns a string representation of this point.
@@ -125,14 +119,6 @@ public class Point implements Comparable<Point> {
     public String toString() {
         /* DO NOT MODIFY */
         return "(" + x + ", " + y + ")";
-    }
-
-    public double getSlope() {
-        return slope;
-    }
-
-    public void setSlope(double slope) {
-        this.slope = slope;
     }
 
     /**

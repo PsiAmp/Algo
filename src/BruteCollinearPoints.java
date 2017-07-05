@@ -11,6 +11,7 @@ import java.util.List;
  */
 public class BruteCollinearPoints {
 
+    public static final int MAX_COLLENEAR_POINTS = 4;
     private LineSegment[] segments;
 
     /**
@@ -29,7 +30,7 @@ public class BruteCollinearPoints {
 
         List<LineSegment> lineSegments = new ArrayList();
 
-        for (int i = 0; i < points.length; i++) {
+        for (int i = 0; i < points.length - MAX_COLLENEAR_POINTS; i++) {
             for (int j = i+1; j < points.length; j++) {
                 double slope1 = points[i].slopeTo(points[j]);
                 for (int n = j+1; n < points.length; n++) {
@@ -85,7 +86,7 @@ public class BruteCollinearPoints {
 
     public static void main(String[] args) {
         // read the n points from a file
-        In in = new In(args[0]);
+        In in = new In("d:\\Projects\\Algo\\src\\collinear\\rs1423.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
