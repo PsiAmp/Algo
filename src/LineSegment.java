@@ -33,7 +33,6 @@ public class LineSegment {
         this.q = q;
     }
 
-
     /**
      * Draws this line segment to standard draw.
      */

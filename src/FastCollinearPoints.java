@@ -9,6 +9,7 @@ import java.util.List;
  */
 public class FastCollinearPoints {
 
+    // TODO rename as there could be more then 4 points
     public static final int MAX_COLLENEAR_POINTS = 4;
 
     /**
@@ -28,16 +29,45 @@ public class FastCollinearPoints {
         List<LineSegment> lineSegments = new ArrayList();
 
         for (int i = 0; i < points.length- MAX_COLLENEAR_POINTS; i++) {
+            // TODO think about reusing the same array. Nulls can be used as a marker of array end;
+            // TODO reversed loop can be used so array grows instead of shrinking
             Point[] slopePoints = new Point[points.length - i - 1];
             for (int j = 0; j < slopePoints.length; j++) {
                 slopePoints[j] = points[i+j+1];
             }
+
+
+
+            // Sort point by slope with parent point
             Arrays.sort(slopePoints, points[i].slopeOrder());
-            for (int k = 0; k < slopePoints.length; k++) {
-                System.out.println(points[i].slopeTo(slopePoints[k]));
+
+            // Finding 3 subsequent collenear points in already sorted array
+            for (int min = 0; min < slopePoints.length - MAX_COLLENEAR_POINTS+1; min++) {
+                double slope = points[i].slopeTo(slopePoints[min]);
+
+                // max is the top index that has the same slope
+                // btw this won't work for sets of 2 points. see if statement below
+                int max = min+1;
+                while (max < slopePoints.length && points[i].slopeTo(slopePoints[max]) == slope) {
+                    // increase max as sequence of equal slopes isn't interrupted
+                    max++;
+                }
+
+                // check if enough collenear points were found
+                if (max - min >= MAX_COLLENEAR_POINTS) {
+
+                }
+
+                min = max+1;
             }
-            System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
         }
+    }
+
+    private void printSlopes(Point point, Point[] points) {
+        for (int k = 0; k < points.length; k++) {
+            System.out.println(point.slopeTo(points[k]));
+        }
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     }
 
     /**
@@ -57,7 +87,7 @@ public class FastCollinearPoints {
     }
 
     public static void main(String[] args) {
-        In in = new In("d:\\Projects\\Algo\\src\\collinear\\input10.txt");
+        In in = new In("c:\\Users\\konstantinko\\workspace\\algorithms\\src\\percolation\\input10.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
@@ -67,6 +97,5 @@ public class FastCollinearPoints {
         }
 
         FastCollinearPoints fastCollinearPoints = new FastCollinearPoints(points);
-
     }
 }
