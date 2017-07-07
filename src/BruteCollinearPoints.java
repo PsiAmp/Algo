@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class BruteCollinearPoints {
 
-    public static final int MAX_COLLENEAR_POINTS = 4;
+    public static final int MAX_COLLINEAR_POINTS = 4;
     private LineSegment[] segments;
 
     /**
@@ -30,7 +30,7 @@ public class BruteCollinearPoints {
 
         List<LineSegment> lineSegments = new ArrayList();
 
-        for (int i = 0; i < points.length - MAX_COLLENEAR_POINTS; i++) {
+        for (int i = 0; i < points.length - MAX_COLLINEAR_POINTS; i++) {
             for (int j = i+1; j < points.length; j++) {
                 double slope1 = points[i].slopeTo(points[j]);
                 for (int n = j+1; n < points.length; n++) {
@@ -39,13 +39,13 @@ public class BruteCollinearPoints {
                         for (int m = n + 1; m < points.length; m++) {
                             double slope3 = points[n].slopeTo(points[m]);
                             if (slope3 == slope2) {
-                                Point[] collenearPoints = new Point[4];
-                                collenearPoints[0] = points[i];
-                                collenearPoints[1] = points[j];
-                                collenearPoints[2] = points[n];
-                                collenearPoints[3] = points[m];
-                                Arrays.sort(collenearPoints);
-                                LineSegment lineSegment = new LineSegment(collenearPoints[0], collenearPoints[3]);
+                                Point[] collinearPoints = new Point[4];
+                                collinearPoints[0] = points[i];
+                                collinearPoints[1] = points[j];
+                                collinearPoints[2] = points[n];
+                                collinearPoints[3] = points[m];
+                                Arrays.sort(collinearPoints);
+                                LineSegment lineSegment = new LineSegment(collinearPoints[0], collinearPoints[3]);
                                 if (!contains(lineSegments, lineSegment)) {
                                     lineSegments.add(lineSegment);
                                 }

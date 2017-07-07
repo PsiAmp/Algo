@@ -10,7 +10,8 @@ import java.util.List;
 public class FastCollinearPoints {
 
     // TODO rename as there could be more then 4 points
-    public static final int MAX_COLLENEAR_POINTS = 4;
+    public static final int MAX_COLLINEAR_POINTS = 4;
+    private final List<LineSegment> lineSegments;
 
     /**
      * Finds all line segments containing 4 or more points
@@ -26,9 +27,12 @@ public class FastCollinearPoints {
             if (points[i].equals(points[i+1])) throw new IllegalArgumentException();
         }
 
-        List<LineSegment> lineSegments = new ArrayList();
+        lineSegments = new ArrayList();
 
-        for (int i = 0; i < points.length- MAX_COLLENEAR_POINTS; i++) {
+        // Sort points by position. As Arrays sort is stable order should be saved when slopePoints are sorted by slope below
+        Arrays.sort(points);
+
+        for (int i = 0; i < points.length- MAX_COLLINEAR_POINTS; i++) {
             // TODO think about reusing the same array. Nulls can be used as a marker of array end;
             // TODO reversed loop can be used so array grows instead of shrinking
             Point[] slopePoints = new Point[points.length - i - 1];
@@ -36,13 +40,11 @@ public class FastCollinearPoints {
                 slopePoints[j] = points[i+j+1];
             }
 
-
-
-            // Sort point by slope with parent point
+            // Sort point by slope with parent point. Important! This sort works together with the sort outside for-loop
             Arrays.sort(slopePoints, points[i].slopeOrder());
 
-            // Finding 3 subsequent collenear points in already sorted array
-            for (int min = 0; min < slopePoints.length - MAX_COLLENEAR_POINTS+1; min++) {
+            // Finding 3 subsequent collinear points in already sorted array
+            for (int min = 0; min < slopePoints.length - MAX_COLLINEAR_POINTS +1; min++) {
                 double slope = points[i].slopeTo(slopePoints[min]);
 
                 // max is the top index that has the same slope
@@ -53,9 +55,9 @@ public class FastCollinearPoints {
                     max++;
                 }
 
-                // check if enough collenear points were found
-                if (max - min >= MAX_COLLENEAR_POINTS) {
-
+                // check if enough collinear points were found
+                if (max - min >= MAX_COLLINEAR_POINTS) {
+                    lineSegments.add(new LineSegment(points[i], slopePoints[max]));
                 }
 
                 min = max+1;
@@ -75,7 +77,7 @@ public class FastCollinearPoints {
      * @return
      */
     public  int numberOfSegments() {
-        return 0;
+        return lineSegments.size();
     }
 
     /**
@@ -83,7 +85,7 @@ public class FastCollinearPoints {
      * @return
      */
     public LineSegment[] segments() {
-        return null;
+        return lineSegments.toArray(new LineSegment[lineSegments.size()]);
     }
 
     public static void main(String[] args) {
