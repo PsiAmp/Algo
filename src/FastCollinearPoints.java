@@ -1,4 +1,6 @@
 import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdDraw;
+import edu.princeton.cs.algs4.StdOut;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +45,8 @@ public class FastCollinearPoints {
             // Sort point by slope with parent point. Important! This sort works together with the sort outside for-loop
             Arrays.sort(slopePoints, points[i].slopeOrder());
 
+            //printSlopes(points[i], slopePoints);
+
             // Finding 3 subsequent collinear points in already sorted array
             for (int min = 0; min < slopePoints.length - MAX_COLLINEAR_POINTS +1; min++) {
                 double slope = points[i].slopeTo(slopePoints[min]);
@@ -56,11 +60,11 @@ public class FastCollinearPoints {
                 }
 
                 // check if enough collinear points were found
-                if (max - min >= MAX_COLLINEAR_POINTS) {
-                    lineSegments.add(new LineSegment(points[i], slopePoints[max]));
+                if (max - min >= MAX_COLLINEAR_POINTS-1) {
+                    // TODO max-1 is a mistake
+                    lineSegments.add(new LineSegment(points[i], slopePoints[max-1]));
+                    min = max;
                 }
-
-                min = max+1;
             }
         }
     }
@@ -89,7 +93,7 @@ public class FastCollinearPoints {
     }
 
     public static void main(String[] args) {
-        In in = new In("c:\\Users\\konstantinko\\workspace\\algorithms\\src\\percolation\\input10.txt");
+        In in = new In("c:\\Users\\konstantinko\\workspace\\Algo\\src\\collinear\\rs1423.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
@@ -98,6 +102,21 @@ public class FastCollinearPoints {
             points[i] = new Point(x, y);
         }
 
-        FastCollinearPoints fastCollinearPoints = new FastCollinearPoints(points);
+        // draw the points
+        StdDraw.enableDoubleBuffering();
+        StdDraw.setXscale(0, 32768);
+        StdDraw.setYscale(0, 32768);
+        for (Point p : points) {
+            p.draw();
+        }
+        StdDraw.show();
+
+        // print and draw the line segments
+        FastCollinearPoints collinear = new FastCollinearPoints(points);
+        for (LineSegment segment : collinear.segments()) {
+            StdOut.println(segment);
+            segment.draw();
+        }
+        StdDraw.show();
     }
 }
