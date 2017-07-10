@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class BruteCollinearPoints {
 
-    public static final int MAX_COLLINEAR_POINTS = 4;
+    private static final int MAX_COLLINEAR_POINTS = 4;
     private LineSegment[] segments;
 
     /**
@@ -28,7 +28,7 @@ public class BruteCollinearPoints {
             if (points[i].equals(points[i+1])) throw new IllegalArgumentException();
         }
 
-        List<LineSegment> lineSegments = new ArrayList();
+        List<LineSegment> lineSegments = new ArrayList<LineSegment>();
 
         for (int i = 0; i < points.length - MAX_COLLINEAR_POINTS; i++) {
             for (int j = i+1; j < points.length; j++) {
@@ -56,7 +56,7 @@ public class BruteCollinearPoints {
             }
         }
 
-        this.segments = lineSegments.toArray(new LineSegment[lineSegments.size()]);
+        segments = lineSegments.toArray(new LineSegment[lineSegments.size()]);
     }
 
     private boolean contains(List<LineSegment> segments, LineSegment segment) {

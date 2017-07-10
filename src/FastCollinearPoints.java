@@ -12,8 +12,8 @@ import java.util.List;
 public class FastCollinearPoints {
 
     // TODO rename as there could be more then 4 points
-    public static final int MAX_COLLINEAR_POINTS = 4;
-    private final List<LineSegment> lineSegments;
+    private static final int MAX_COLLINEAR_POINTS = 4;
+    private LineSegment[] segments;
 
     /**
      * Finds all line segments containing 4 or more points
@@ -29,7 +29,7 @@ public class FastCollinearPoints {
             if (points[i].equals(points[i+1])) throw new IllegalArgumentException();
         }
 
-        lineSegments = new ArrayList();
+        List<LineSegment> lineSegments = new ArrayList<LineSegment>();
 
         // Sort points by position. As Arrays sort is stable order should be saved when slopePoints are sorted by slope below
         Arrays.sort(points);
@@ -67,6 +67,8 @@ public class FastCollinearPoints {
                 }
             }
         }
+
+        segments = lineSegments.toArray(new LineSegment[lineSegments.size()]);
     }
 
     private void printSlopes(Point point, Point[] points) {
@@ -81,7 +83,7 @@ public class FastCollinearPoints {
      * @return
      */
     public  int numberOfSegments() {
-        return lineSegments.size();
+        return segments.length;
     }
 
     /**
@@ -89,11 +91,11 @@ public class FastCollinearPoints {
      * @return
      */
     public LineSegment[] segments() {
-        return lineSegments.toArray(new LineSegment[lineSegments.size()]);
+        return segments;
     }
 
     public static void main(String[] args) {
-        In in = new In("c:\\Users\\konstantinko\\workspace\\Algo\\src\\collinear\\rs1423.txt");
+        In in = new In("d:\\Projects\\Algo\\src\\collinear\\input9.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
