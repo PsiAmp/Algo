@@ -24,7 +24,6 @@ public class Point implements Comparable<Point> {
         public int compare(Point point1, Point point2) {
             double slopeP1 = slopeTo(point1);
             double slopeP2 = slopeTo(point2);
-            if (slopeP1 == Double.NEGATIVE_INFINITY || slopeP2 == Double.NEGATIVE_INFINITY) return 0;
             if (slopeP1 > slopeP2) return 1;
             if (slopeP1 < slopeP2) return -1;
             return 0;
