@@ -44,47 +44,6 @@ public class FastCollinearPoints {
         segments = lineSegments.toArray(new LineSegment[lineSegments.size()]);
     }
 
-    private void oldWay(Point[] points) {
-        List<LineSegment> lineSegments = new ArrayList<LineSegment>();
-
-        // Sort points by position. As Arrays sort is stable order should be saved when slopePoints are sorted by slope below
-        Arrays.sort(points);
-
-        for (int i = 0; i < points.length- MIN_COLLINEAR_POINTS; i++) {
-            // TODO think about reusing the same array. Nulls can be used as a marker of array end;
-            // TODO reversed loop can be used so array grows instead of shrinking
-            Point[] slopePoints = new Point[points.length - i - 1];
-            for (int j = 0; j < slopePoints.length; j++) {
-                slopePoints[j] = points[i+j+1];
-            }
-
-            // Sort point by slope with parent point. Important! This sort works together with the sort outside for-loop
-            Arrays.sort(slopePoints, points[i].slopeOrder());
-
-            //printSlopes(points[i], slopePoints);
-
-            // Finding 3 subsequent collinear points in already sorted array
-            for (int min = 0; min < slopePoints.length - MIN_COLLINEAR_POINTS +1; min++) {
-                double slope = points[i].slopeTo(slopePoints[min]);
-
-                // max is the top index that has the same slope
-                // btw this won't work for sets of 2 points. see if statement below
-                int max = min+1;
-                while (max < slopePoints.length && points[i].slopeTo(slopePoints[max]) == slope) {
-                    // increase max as sequence of equal slopes isn't interrupted
-                    max++;
-                }
-
-                // check if enough collinear points were found
-                if (max - min >= MIN_COLLINEAR_POINTS -1) {
-                    // TODO max-1 is a mistake
-                    lineSegments.add(new LineSegment(points[i], slopePoints[max-1]));
-                    min = max;
-                }
-            }
-        }
-    }
-
     /**
      * Utilizing stability of Arrays.sort() algorithm we can sort points twice:
      * 1. by position
@@ -135,13 +94,6 @@ public class FastCollinearPoints {
             }
         }
         return false;
-    }
-
-    private void printSlopes(Point point, Point[] points) {
-        for (int k = 0; k < points.length; k++) {
-            System.out.println(point.slopeTo(points[k]));
-        }
-        System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
     }
 
     /**
