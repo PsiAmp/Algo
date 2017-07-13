@@ -56,11 +56,12 @@ public class FastCollinearPoints {
         List<LineSegment> segments = new ArrayList<LineSegment>();
 
         // Sort points by position.
-        Arrays.sort(points);
+        //Arrays.sort(points);
 
         // Sort points by a slope with points[pointIndex]
         Arrays.sort(points, points[pointIndex].slopeOrder());
 
+        // TODO check if optimization works: i < points.length - MIN_COLLINEAR_POINTS + 1
         for (int i = 0; i < points.length; i++) {
             Point currentPoint = points[i];
 
@@ -70,12 +71,13 @@ public class FastCollinearPoints {
             // Now count how many subsequent points have the same slope
             // "pointIndex == i" is a corner case slope from point to itself is obtained.
             int counter = i;
-            while (counter + 1 < points.length && (pointIndex == i || currentPoint.slopeTo(points[counter + 1]) == slope)) {
+            while (counter + 1 < points.length && currentPoint.slopeTo(points[counter + 1]) == slope) {
                 counter++;
             }
 
             // Check if there are enough collinear points
-            if (counter - i >= MIN_COLLINEAR_POINTS-1) {
+            if (counter - i >= MIN_COLLINEAR_POINTS - 1) {
+                System.out.println(counter - i);
                 // As we also sorted points by position, now first and last points should be farther away and represent line segment (at least in theory)
                 segments.add(new LineSegment(currentPoint, points[counter]));
 
@@ -113,7 +115,7 @@ public class FastCollinearPoints {
     }
 
     public static void main(String[] args) {
-        In in = new In("c:\\Users\\konstantinko\\workspace\\Algo\\src\\collinear\\input9.txt");
+        In in = new In("c:\\Users\\konstantinko\\workspace\\Algo\\src\\collinear\\input10.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
@@ -136,7 +138,7 @@ public class FastCollinearPoints {
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             segment.draw();
+            StdDraw.show();
         }
-        StdDraw.show();
     }
 }
