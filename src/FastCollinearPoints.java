@@ -2,7 +2,6 @@ import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
 import edu.princeton.cs.algs4.StdOut;
 
-import javax.swing.text.Segment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
 public class FastCollinearPoints {
 
     private static final int MIN_COLLINEAR_POINTS = 4;
-    private LineSegment[] segments;
+    private final LineSegment[] segments;
 
     /**
      * Finds all line segments containing 4 or more points
@@ -31,7 +30,8 @@ public class FastCollinearPoints {
 
         List<LineSegment> lineSegments = new ArrayList<LineSegment>();
 
-        for (int i = 0; i < points.length; i++) {
+        // TODO check if optimization works: i < points.length - MIN_COLLINEAR_POINTS + 1
+        for (int i = 0; i < points.length - MIN_COLLINEAR_POINTS + 1; i++) {
             List<LineSegment> collinearSegments = findCollinear(Arrays.copyOf(points, points.length), i);
             for (LineSegment lineSegment : collinearSegments) {
                 // If there's no such line segment - add it.
@@ -53,44 +53,52 @@ public class FastCollinearPoints {
      * @return
      */
     private List<LineSegment> findCollinear(Point[] points, int pointIndex) {
-        List<LineSegment> segments = new ArrayList<LineSegment>();
+        List<LineSegment> lineSegments = new ArrayList<LineSegment>();
 
-        // Sort points by position.
-        //Arrays.sort(points);
+        Point original = points[pointIndex];
 
         // Sort points by a slope with points[pointIndex]
         Arrays.sort(points, points[pointIndex].slopeOrder());
 
-        // TODO check if optimization works: i < points.length - MIN_COLLINEAR_POINTS + 1
-        for (int i = 0; i < points.length; i++) {
-            Point currentPoint = points[i];
+        for (int i = 1; i < points.length; i++) {
+            // Origin point is at 0 index
+            double slope = original.slopeTo(points[i]);
 
-            // Get a slope for a current point
-            double slope = points[pointIndex].slopeTo(currentPoint);
-
-            // Now count how many subsequent points have the same slope
-            // "pointIndex == i" is a corner case slope from point to itself is obtained.
-            int counter = i;
-            while (counter + 1 < points.length && currentPoint.slopeTo(points[counter + 1]) == slope) {
+            // Now count how many subsequent points have the same slope. Works with any number of collinear points
+            // TODO: Mini-optimization: jump 3 points ahead
+            int counter = i+1;
+            while (counter < points.length && original.slopeTo(points[counter]) == slope) {
                 counter++;
             }
 
             // Check if there are enough collinear points
             if (counter - i >= MIN_COLLINEAR_POINTS - 1) {
-                System.out.println(counter - i);
-                // As we also sorted points by position, now first and last points should be farther away and represent line segment (at least in theory)
-                segments.add(new LineSegment(currentPoint, points[counter]));
+                // TODO original array can be sorted providing from and to indexes
+                // Adding one more point so there's a place for origin point
+                Point[] collinearPoints = Arrays.copyOfRange(points, i, counter+1);
+
+                // Add origin point
+                collinearPoints[collinearPoints.length-1] = original;
+
+                // Sort points by position
+                Arrays.sort(collinearPoints);
+
+                // Points are sorted by position. Form line segment from two points that are further apart
+                lineSegments.add(new LineSegment(collinearPoints[0], collinearPoints[collinearPoints.length-1]));
 
                 // Jump to the start of the next possible sequence
                 i = counter+1;
+            } else {
+                // TODO mini-optimization. Skipping points with the same slope but not enough to form a segment
+                i = counter-1;
             }
         }
 
-        return segments;
+        return lineSegments;
     }
 
-    private boolean contains(List<LineSegment> segments, LineSegment segment) {
-        for (LineSegment lineSegment : segments) {
+    private boolean contains(List<LineSegment> lineSegments, LineSegment segment) {
+        for (LineSegment lineSegment : lineSegments) {
             if (lineSegment.equals(segment)) {
                 return true;
             }
@@ -111,11 +119,11 @@ public class FastCollinearPoints {
      * @return
      */
     public LineSegment[] segments() {
-        return segments;
+        return Arrays.copyOf(segments, segments.length);
     }
 
     public static void main(String[] args) {
-        In in = new In("c:\\Users\\konstantinko\\workspace\\Algo\\src\\collinear\\input10.txt");
+        In in = new In("d:\\Projects\\Algo\\src\\collinear\\rs1423.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
@@ -138,7 +146,7 @@ public class FastCollinearPoints {
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             segment.draw();
-            StdDraw.show();
         }
+        StdDraw.show();
     }
 }

@@ -22,10 +22,9 @@ public class Point implements Comparable<Point> {
     private class SlopeOrder implements Comparator<Point> {
         @Override
         public int compare(Point point1, Point point2) {
-            double slopeP1 = slopeTo(point1);
-            double slopeP2 = slopeTo(point2);
-            if (slopeP1 > slopeP2) return 1;
-            if (slopeP1 < slopeP2) return -1;
+            double delta = slopeTo(point1) - slopeTo(point2);
+            if (delta > 0) return 1;
+            if (delta < 0) return -1;
             return 0;
         }
     }

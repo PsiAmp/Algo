@@ -12,7 +12,7 @@ import java.util.List;
 public class BruteCollinearPoints {
 
     private static final int MAX_COLLINEAR_POINTS = 4;
-    private LineSegment[] segments;
+    private final LineSegment[] segments;
 
     /**
      * Finds all line segments containing 4 points
@@ -59,8 +59,8 @@ public class BruteCollinearPoints {
         segments = lineSegments.toArray(new LineSegment[lineSegments.size()]);
     }
 
-    private boolean contains(List<LineSegment> segments, LineSegment segment) {
-        for (LineSegment lineSegment : segments) {
+    private boolean contains(List<LineSegment> lineSegments, LineSegment segment) {
+        for (LineSegment lineSegment : lineSegments) {
             if (lineSegment.equals(segment)) {
                 return true;
             }
@@ -81,12 +81,12 @@ public class BruteCollinearPoints {
      * @return
      */
     public LineSegment[] segments() {
-        return segments;
+        return Arrays.copyOf(segments, segments.length);
     }
 
     public static void main(String[] args) {
         // read the n points from a file
-        In in = new In("d:\\Projects\\Algo\\src\\collinear\\rs1423.txt");
+        In in = new In(args[0]);
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {

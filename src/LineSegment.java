@@ -1,6 +1,3 @@
-/**
- * Created by Kostiantyn Kostin on 02.07.2017.
- */
 /*************************************************************************
  *  Compilation:  javac LineSegment.java
  *  Execution:    none
@@ -33,6 +30,7 @@ public class LineSegment {
         this.q = q;
     }
 
+    
     /**
      * Draws this line segment to standard draw.
      */
@@ -63,17 +61,5 @@ public class LineSegment {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        LineSegment lineSegment = (LineSegment) obj;
-        return this.getP().equals(lineSegment.getP()) && this.getQ().equals(lineSegment.getQ());
-    }
-
-    public Point getP() {
-        return p;
-    }
-
-    public Point getQ() {
-        return q;
-    }
 }
+
