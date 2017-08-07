@@ -11,7 +11,6 @@ import java.util.List;
  */
 public class BruteCollinearPoints {
 
-    private static final int MAX_COLLINEAR_POINTS = 4;
     private final LineSegment[] segments;
 
     /**
@@ -30,25 +29,22 @@ public class BruteCollinearPoints {
 
         List<LineSegment> lineSegments = new ArrayList<LineSegment>();
 
-        for (int i = 0; i < points.length - MAX_COLLINEAR_POINTS; i++) {
+        for (int i = 0; i < points.length; i++) {
             for (int j = i+1; j < points.length; j++) {
-                double slope1 = points[i].slopeTo(points[j]);
+                double slopeIJ = points[i].slopeTo(points[j]);
                 for (int n = j+1; n < points.length; n++) {
-                    double slope2 = points[j].slopeTo(points[n]);
-                    if (slope1 == slope2) {
+                    double slopeJN = points[j].slopeTo(points[n]);
+                    if (slopeIJ == slopeJN) {
                         for (int m = n + 1; m < points.length; m++) {
-                            double slope3 = points[n].slopeTo(points[m]);
-                            if (slope3 == slope2) {
+                            double slopeNM = points[n].slopeTo(points[m]);
+                            if (slopeNM == slopeJN) {
                                 Point[] collinearPoints = new Point[4];
                                 collinearPoints[0] = points[i];
                                 collinearPoints[1] = points[j];
                                 collinearPoints[2] = points[n];
                                 collinearPoints[3] = points[m];
-                                Arrays.sort(collinearPoints);
-                                LineSegment lineSegment = new LineSegment(collinearPoints[0], collinearPoints[3]);
-                                if (!contains(lineSegments, lineSegment)) {
-                                    lineSegments.add(lineSegment);
-                                }
+                                if (collinearPoints[0] == points[i])
+                                    lineSegments.add(new LineSegment(points[i], points[m]));
                             }
                         }
                     }
@@ -57,15 +53,6 @@ public class BruteCollinearPoints {
         }
 
         segments = lineSegments.toArray(new LineSegment[lineSegments.size()]);
-    }
-
-    private boolean contains(List<LineSegment> lineSegments, LineSegment segment) {
-        for (LineSegment lineSegment : lineSegments) {
-            if (lineSegment.equals(segment)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -86,7 +73,7 @@ public class BruteCollinearPoints {
 
     public static void main(String[] args) {
         // read the n points from a file
-        In in = new In(args[0]);
+        In in = new In("d:\\Projects\\Algo\\src\\collinear\\rs1423.txt");
         int n = in.readInt();
         Point[] points = new Point[n];
         for (int i = 0; i < n; i++) {
