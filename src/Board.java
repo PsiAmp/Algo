@@ -5,6 +5,8 @@ import java.util.ArrayList;
 public class Board {
 
     private static final int[][] SHIFTS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    private final int hamming;
+    private final int manhattan;
 
     private int[][] blocks;
 
@@ -16,6 +18,9 @@ public class Board {
      */
     public Board(int[][] blocks) {
         this.blocks = blocks;
+        // TODO use cached values in priority functions
+        hamming = hamming();
+        manhattan = manhattan();
     }
 
     /**
