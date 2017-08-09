@@ -1,6 +1,10 @@
 import edu.princeton.cs.algs4.StdOut;
 
+import java.util.ArrayList;
+
 public class Board {
+
+    private static final int[][] SHIFTS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
     private int[][] blocks;
 
@@ -93,7 +97,51 @@ public class Board {
      * @return
      */
     public Iterable<Board> neighbors() {
+        // Empty item
+        int row = 0;
+        int col = 0;
+        for (int i = 1; i < blocks.length; i++) {
+            for (int j = 0; j < blocks[i].length; j++) {
+                if (blocks[i][j] == 0) {
+                    row = i;
+                    col = j;
+                }
+            }
+        }
 
+        ArrayList<Board> boards = new ArrayList<>();
+        for (int i = 0; i < SHIFTS.length; i++) {
+            Board board = swap(row, col, SHIFTS[i][0], SHIFTS[i][1]);
+            if (board != null) {
+                boards.add(board);
+            }
+        }
+        return boards;
+    }
+
+    private Board swap(int x1, int y1, int x2, int y2) {
+        if (!isInBounds(x1) || !isInBounds(y1) || !isInBounds(x2) || !isInBounds(y2)) return null;
+
+        int[][] b = createCopyOfBlocks();
+        int t = b[x1][y1];
+        b[x1][y1] = b[x2][y2];
+        b[x2][y2] = t;
+
+        return new Board(b);
+    }
+
+    private boolean isInBounds(int coordinate) {
+        return coordinate < dimension() && coordinate >= 0;
+    }
+
+    private int[][] createCopyOfBlocks() {
+        int[][] b = new int[dimension()][dimension()];
+        for (int i = 0; i < blocks.length; i++) {
+            for (int j = 0; j < blocks[i].length; j++) {
+                b[i][j] = blocks[i][j];
+            }
+        }
+        return b;
     }
 
     /**
