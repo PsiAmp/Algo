@@ -1,4 +1,4 @@
-import edu.princeton.cs.algs4.StdOut;
+import java.util.Random;
 
 import java.util.ArrayList;
 
@@ -18,9 +18,8 @@ public class Board {
      */
     public Board(int[][] blocks) {
         this.blocks = blocks;
-        // TODO use cached values in priority functions
-        hamming = hamming();
-        manhattan = manhattan();
+        hamming = calcHamming();
+        manhattan = calcManhattan();
     }
 
     /**
@@ -38,7 +37,19 @@ public class Board {
      * @return
      */
     public int hamming() {
+        return hamming;
+    }
 
+    private int calcHamming() {
+        int hamming = 0;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (blocks[i][j] != 0 && blocks[i][j] != 1 + i * dimension() + j) {
+                    hamming++;
+                }
+            }
+        }
+        return hamming;
     }
 
     /**
@@ -47,6 +58,21 @@ public class Board {
      * @return
      */
     public int manhattan() {
+        return manhattan;
+    }
+
+    private int calcManhattan() {
+        int manhattan = 0;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (blocks[i][j] != 0) {
+                    int dy = Math.abs((blocks[i][j] - 1) / dimension() - i);
+                    int dx = Math.abs((blocks[i][j] - 1) % dimension() - j);
+                    manhattan += dx + dy;
+                }
+            }
+        }
+        return manhattan;
     }
 
     /**
@@ -55,9 +81,16 @@ public class Board {
      * @return
      */
     public boolean isGoal() {
-        for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) {
-                if (blocks[i][j] != 1 + i * dimension() + j) {
+        // TODO measure speed division vs multiplication
+//        for (int i = 0; i < dimension() * dimension() - 1; i++) {
+//            if (blocks[i/dimension()][i%dimension()] != i+1) {
+//                return false;
+//            }
+//        }
+//        return true;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (blocks[i][j] != 1 + i * dimension() + j && blocks[i][j] != 0) {
                     return false;
                 }
             }
@@ -71,6 +104,74 @@ public class Board {
      * @return
      */
     public Board twin() {
+        // TODO fix this: doesn't return a twin
+        int[][] twin = new int[dimension()][dimension()];
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                twin[i][j] = blocks[i][j];
+            }
+        }
+
+        Random r = new Random();
+        int val1 = r.nextInt(9) + 1;
+        int val2 = (r.nextInt(8) + 1 + 1 + val1) % dimension();
+
+        return swap(val1 / dimension(), val1 % dimension(), val2 / dimension(), val2 % dimension());
+    }
+
+    /**
+     * all neighboring boards
+     *
+     * @return
+     */
+    public Iterable<Board> neighbors() {
+        // Search empty item coordinates
+        int row = 0;
+        int col = 0;
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                if (blocks[i][j] == 0) {
+                    row = i;
+                    col = j;
+                }
+            }
+        }
+
+        ArrayList<Board> boards = new ArrayList<>();
+        for (int i = 0; i < SHIFTS.length; i++) {
+            Board board = swap(row, col, row + SHIFTS[i][0], col + SHIFTS[i][1]);
+            if (board != null) {
+                boards.add(board);
+            }
+        }
+
+        return boards;
+    }
+
+    private Board swap(int x1, int y1, int x2, int y2) {
+        if (!isInBounds(x1) || !isInBounds(y1) || !isInBounds(x2) || !isInBounds(y2)) return null;
+
+        int[][] b = createCopyOfBlocks();
+        int t = b[x1][y1];
+        b[x1][y1] = b[x2][y2];
+        b[x2][y2] = t;
+
+        Board board = new Board(b);
+        return board;
+    }
+
+    private boolean isInBounds(int coordinate) {
+        return coordinate < dimension() && coordinate >= 0;
+    }
+
+    private int[][] createCopyOfBlocks() {
+        int[][] b = new int[dimension()][dimension()];
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
+                b[i][j] = blocks[i][j];
+            }
+        }
+        return b;
     }
 
     /**
@@ -86,8 +187,8 @@ public class Board {
         Board otherBoard = (Board) other;
         if (otherBoard.dimension() != dimension()) return false;
 
-        for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) {
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
                 if (otherBoard.blocks[i][j] != blocks[i][j]) {
                     return false;
                 }
@@ -97,73 +198,21 @@ public class Board {
     }
 
     /**
-     * all neighboring boards
-     *
-     * @return
-     */
-    public Iterable<Board> neighbors() {
-        // Empty item
-        int row = 0;
-        int col = 0;
-        for (int i = 1; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) {
-                if (blocks[i][j] == 0) {
-                    row = i;
-                    col = j;
-                }
-            }
-        }
-
-        ArrayList<Board> boards = new ArrayList<>();
-        for (int i = 0; i < SHIFTS.length; i++) {
-            Board board = swap(row, col, SHIFTS[i][0], SHIFTS[i][1]);
-            if (board != null) {
-                boards.add(board);
-            }
-        }
-        return boards;
-    }
-
-    private Board swap(int x1, int y1, int x2, int y2) {
-        if (!isInBounds(x1) || !isInBounds(y1) || !isInBounds(x2) || !isInBounds(y2)) return null;
-
-        int[][] b = createCopyOfBlocks();
-        int t = b[x1][y1];
-        b[x1][y1] = b[x2][y2];
-        b[x2][y2] = t;
-
-        return new Board(b);
-    }
-
-    private boolean isInBounds(int coordinate) {
-        return coordinate < dimension() && coordinate >= 0;
-    }
-
-    private int[][] createCopyOfBlocks() {
-        int[][] b = new int[dimension()][dimension()];
-        for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) {
-                b[i][j] = blocks[i][j];
-            }
-        }
-        return b;
-    }
-
-    /**
      * string representation of this board (in the output format specified below)
      *
      * @return
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < blocks.length; i++) {
-            for (int j = 0; j < blocks[i].length; j++) {
+        sb.append(dimension() + "\n");
+        for (int i = 0; i < dimension(); i++) {
+            for (int j = 0; j < dimension(); j++) {
                 sb.append(blocks[i][j]);
-                if (j + 1 < blocks[i].length) {
+                if (j + 1 < dimension()) {
                     sb.append(" ");
                 }
             }
-            sb.append("\\n");
+            sb.append("\n");
         }
         return sb.toString();
     }
