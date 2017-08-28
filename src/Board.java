@@ -1,14 +1,13 @@
-import java.util.Random;
-
 import java.util.ArrayList;
 
 public class Board {
 
     private static final int[][] SHIFTS = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-    private final int hamming;
-    private final int manhattan;
+    private int hamming = -1;
+    private int manhattan;
 
-    private int[][] blocks;
+    private int[] blocks;
+    private int size;
 
     /**
      * construct a board from an n-by-n array of blocks
@@ -17,8 +16,21 @@ public class Board {
      * @param blocks
      */
     public Board(int[][] blocks) {
+        size = blocks.length;
+        this.blocks = new int[size * size];
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                this.blocks[i * size + j] = blocks[i][j];
+            }
+        }
+        //hamming = calcHamming();
+        manhattan = calcManhattan();
+    }
+
+    private Board(int[] blocks, int size) {
         this.blocks = blocks;
-        hamming = calcHamming();
+        this.size = size;
+        //hamming = calcHamming();
         manhattan = calcManhattan();
     }
 
@@ -28,7 +40,7 @@ public class Board {
      * @return
      */
     public int dimension() {
-        return blocks.length;
+        return size;
     }
 
     /**
@@ -37,16 +49,17 @@ public class Board {
      * @return
      */
     public int hamming() {
+        if (hamming == -1)
+            hamming = calcHamming();
         return hamming;
     }
 
     private int calcHamming() {
         int hamming = 0;
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (blocks[i][j] != 0 && blocks[i][j] != 1 + i * dimension() + j) {
-                    hamming++;
-                }
+
+        for (int i = 0; i < blocks.length; i++) {
+            if (blocks[i] != 0 && blocks[i] != i+1) {
+                hamming++;
             }
         }
         return hamming;
@@ -63,13 +76,11 @@ public class Board {
 
     private int calcManhattan() {
         int manhattan = 0;
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (blocks[i][j] != 0) {
-                    int dy = Math.abs((blocks[i][j] - 1) / dimension() - i);
-                    int dx = Math.abs((blocks[i][j] - 1) % dimension() - j);
-                    manhattan += dx + dy;
-                }
+        for (int i = 0; i < blocks.length; i++) {
+            if (blocks[i] != 0) {
+                int dy = Math.abs(i / size - (blocks[i]-1) / size);
+                int dx = Math.abs(i % size - (blocks[i]-1) % size);
+                manhattan += dx + dy;
             }
         }
         return manhattan;
@@ -81,21 +92,7 @@ public class Board {
      * @return
      */
     public boolean isGoal() {
-        // TODO measure speed division vs multiplication
-//        for (int i = 0; i < dimension() * dimension() - 1; i++) {
-//            if (blocks[i/dimension()][i%dimension()] != i+1) {
-//                return false;
-//            }
-//        }
-//        return true;
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (blocks[i][j] != 1 + i * dimension() + j && blocks[i][j] != 0) {
-                    return false;
-                }
-            }
-        }
-        return true;
+        return manhattan == 0;
     }
 
     /**
@@ -104,19 +101,11 @@ public class Board {
      * @return
      */
     public Board twin() {
-        // TODO fix this: doesn't return a twin
-        int[][] twin = new int[dimension()][dimension()];
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                twin[i][j] = blocks[i][j];
-            }
+        if (blocks[0] != 0 && blocks[1] != 0) {
+            return swap(0,0,1,0);
+        } else {
+            return swap(0,1,1,1);
         }
-
-        Random r = new Random();
-        int val1 = r.nextInt(9) + 1;
-        int val2 = (r.nextInt(8) + 1 + 1 + val1) % dimension();
-
-        return swap(val1 / dimension(), val1 % dimension(), val2 / dimension(), val2 % dimension());
     }
 
     /**
@@ -128,18 +117,16 @@ public class Board {
         // Search empty item coordinates
         int row = 0;
         int col = 0;
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (blocks[i][j] == 0) {
-                    row = i;
-                    col = j;
-                }
+        for (int i = 0; i < blocks.length; i++) {
+            if (blocks[i] == 0) {
+                row = i / size;
+                col = i % size;
             }
         }
 
         ArrayList<Board> boards = new ArrayList<>();
         for (int i = 0; i < SHIFTS.length; i++) {
-            Board board = swap(row, col, row + SHIFTS[i][0], col + SHIFTS[i][1]);
+            Board board = swap(col, row, col + SHIFTS[i][0], row + SHIFTS[i][1]);
             if (board != null) {
                 boards.add(board);
             }
@@ -151,26 +138,22 @@ public class Board {
     private Board swap(int x1, int y1, int x2, int y2) {
         if (!isInBounds(x1) || !isInBounds(y1) || !isInBounds(x2) || !isInBounds(y2)) return null;
 
-        int[][] b = createCopyOfBlocks();
-        int t = b[x1][y1];
-        b[x1][y1] = b[x2][y2];
-        b[x2][y2] = t;
+        int[] b = createCopyOfBlocks();
+        int t = b[y1 * size + x1];
+        b[y1 * size + x1] = b[y2 * size + x2];
+        b[y2 * size + x2] = t;
 
-        Board board = new Board(b);
+        Board board = new Board(b, size);
         return board;
     }
 
     private boolean isInBounds(int coordinate) {
-        return coordinate < dimension() && coordinate >= 0;
+        return coordinate < size && coordinate >= 0;
     }
 
-    private int[][] createCopyOfBlocks() {
-        int[][] b = new int[dimension()][dimension()];
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                b[i][j] = blocks[i][j];
-            }
-        }
+    private int[] createCopyOfBlocks() {
+        int[] b = new int[size * size];
+        System.arraycopy(blocks, 0, b, 0, blocks.length);
         return b;
     }
 
@@ -182,16 +165,15 @@ public class Board {
      */
     public boolean equals(Object other) {
         if (this == other) return true;
+        if (other == null) return false;
         if (!(other instanceof Board)) return false;
 
         Board otherBoard = (Board) other;
-        if (otherBoard.dimension() != dimension()) return false;
+        if (otherBoard.size != size) return false;
 
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                if (otherBoard.blocks[i][j] != blocks[i][j]) {
-                    return false;
-                }
+        for (int i = 0; i < blocks.length; i++) {
+            if (blocks[i] != otherBoard.blocks[i]) {
+                return false;
             }
         }
         return true;
@@ -204,15 +186,13 @@ public class Board {
      */
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(dimension() + "\n");
-        for (int i = 0; i < dimension(); i++) {
-            for (int j = 0; j < dimension(); j++) {
-                sb.append(blocks[i][j]);
-                if (j + 1 < dimension()) {
-                    sb.append(" ");
-                }
+        sb.append(size + "\n");
+        for (int i = 0; i < blocks.length; i++) {
+            sb.append(blocks[i]);
+            sb.append(" ");
+            if (i % size == size-1) {
+                sb.append("\n");
             }
-            sb.append("\n");
         }
         return sb.toString();
     }

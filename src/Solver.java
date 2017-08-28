@@ -13,26 +13,28 @@ public class Solver {
         private Board board;
         private SearchNode parent;
         private int moves;
+//        private int hamming;
+        private final int manhattan;
 
         public SearchNode(Board board, SearchNode parent, int moves) {
             this.board = board;
             this.parent = parent;
             this.moves = moves;
+
+            manhattan = board.manhattan() + moves;
+            //hamming = board.hamming() + moves;
         }
     }
 
     private class BoardComparator implements Comparator<SearchNode> {
         @Override
         public int compare(SearchNode node1, SearchNode node2) {
-            int hamming1 = node1.board.hamming() + node1.moves;
-            int hamming2 = node2.board.hamming() + node2.moves;
-            int manhattan1 = node1.board.manhattan() + node1.moves;
-            int manhattan2 = node2.board.manhattan() + node2.moves;
+            if (node1.manhattan > node2.manhattan) return 1;
+            if (node1.manhattan < node2.manhattan) return -1;
 
-            if (manhattan1 > manhattan2) return 1;
-            if (manhattan1 < manhattan2) return -1;
-            if (hamming1 > hamming2) return 1;
-            if (hamming1 < hamming2) return -1;
+//            if (node1.hamming > node2.hamming) return 1;
+//            if (node1.hamming < node2.hamming) return -1;
+
             return 0;
         }
     }
@@ -44,6 +46,8 @@ public class Solver {
      * @param initial
      */
     public Solver(Board initial) {
+        if (initial == null) throw new IllegalArgumentException();
+
         MinPQ<SearchNode> pq = new MinPQ<SearchNode>(new BoardComparator());
         pq.insert(new SearchNode(initial, null, 0));
         SearchNode node = pq.delMin();
@@ -55,6 +59,12 @@ public class Solver {
             Iterable<Board> neighbors = node.board.neighbors();
             for (Board neighbor : neighbors) {
                 // Critical optimization: don't include the same board of the previous node
+
+                /**
+                 * Grader still says there's an issue:
+                 * equals() compares a board to a board that is not a neighbor of a neighbor
+                 * this suggests a bug in the critical optimization
+                 */
                 if (node.parent == null || !neighbor.equals(node.parent.board)) {
                     pq.insert(new SearchNode(neighbor, node, node.moves + 1));
                 }
@@ -68,6 +78,8 @@ public class Solver {
             node = node.parent;
         }
         Collections.reverse(solution);
+
+        // No solution
         if (solution.get(0).equals(twin)) {
             solution = null;
         }
@@ -86,8 +98,7 @@ public class Solver {
      * @return
      */
     public int moves() {
-        // TODO fix this: my moves +1 vs reference
-        return solution == null ? -1 : solution.size();
+        return solution == null ? -1 : solution.size() - 1;
     }
 
     /**
@@ -95,8 +106,6 @@ public class Solver {
      * @return
      */
     public Iterable<Board> solution() {
-        // TODO fix: number of boards in solution() does not equal to 1 + moves()
-        // (it should be 1 greater because solution() starts with the inital board)
         return solution;
     }
 
@@ -106,7 +115,7 @@ public class Solver {
      */
     public static void main(String[] args) {
         // create initial board from file
-        In in = new In("D:\\Projects\\Algo\\src\\8puzzle\\puzzle04.txt");
+        In in = new In("D:\\Projects\\Algo\\src\\8puzzle\\puzzle00.txt");
         int n = in.readInt();
         int[][] blocks = new int[n][n];
         for (int i = 0; i < n; i++)
