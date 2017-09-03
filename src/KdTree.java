@@ -1,18 +1,51 @@
 import edu.princeton.cs.algs4.*;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 
 // TODO stub implementation copied from PointSET
 public class KdTree {
 
-    private SET<Point2D> set;
+    private class HorizontalPointComparator implements Comparator<Point2D> {
+        @Override
+        public int compare(Point2D o1, Point2D o2) {
+            if (o1.x() > o2.x()) return 1;
+            if (o1.x() < o2.x()) return -1;
+            return 0;
+        }
+    }
+
+    private class VerticalPointComparator implements Comparator<Point2D> {
+        @Override
+        public int compare(Point2D o1, Point2D o2) {
+            if (o1.y() > o2.y()) return 1;
+            if (o1.y() < o2.y()) return -1;
+            return 0;
+        }
+    }
+
+    private static class Node {
+        private Point2D p;
+        private RectHV rect;
+        private Node left;
+        private Node right;
+
+        Node(Point2D p) {
+            this.p = p;
+        }
+    }
+
+    private Node root;
+    private int size = 0;
+    private HorizontalPointComparator horizontalPointComparator = new HorizontalPointComparator();
+    private VerticalPointComparator verticalPointComparator = new VerticalPointComparator();
 
     /**
      * construct an empty set of points
      */
-    public KdTree() {
-        set = new SET<Point2D>();
+    public KdTree(){
+
     }
 
     /**
@@ -21,7 +54,7 @@ public class KdTree {
      * @return
      */
     public boolean isEmpty() {
-        return set.isEmpty();
+        return size == 0;
     }
 
     /**
@@ -30,7 +63,12 @@ public class KdTree {
      * @return
      */
     public int size() {
-        return set.size();
+        return size;
+    }
+
+    private int size(Node node) {
+        if (node == null) return 0;
+        return size(node.left) + size(node.right) + 1;
     }
 
     /**
@@ -39,7 +77,25 @@ public class KdTree {
      */
     public void insert(Point2D p) {
         if (p == null) throw new IllegalArgumentException();
-        set.add(p);
+        if (contains(p)) return;
+
+        root = insert(root, p, false);
+
+        size++;
+    }
+
+    private Node insert(Node node, Point2D point, boolean horizontal) {
+        if (node == null) return new Node(point);
+
+        int cmp = getComparator(horizontal).compare(node.p, point);
+        if (cmp > 0) node.left = insert(node.left, point, !horizontal);
+        else if (cmp < 0) node.right = insert(node.right, point, !horizontal);
+
+        return node;
+    }
+
+    private Comparator<Point2D> getComparator(boolean horizontal) {
+        return horizontal ? horizontalPointComparator : verticalPointComparator;
     }
 
     /**
@@ -49,7 +105,20 @@ public class KdTree {
      */
     public boolean contains(Point2D p) {
         if (p == null) throw new IllegalArgumentException();
-        return set.contains(p);
+        if (isEmpty()) return false;
+
+        return contains(root, p, false);
+    }
+
+    private boolean contains(Node node, Point2D p, boolean horizontal) {
+        if (node == null) return false;
+        if (p.equals(node.p)) return true;
+
+        int cmp = getComparator(horizontal).compare(node.p, p);
+        if (cmp > 0) return contains(node.left, p, !horizontal);
+        if (cmp < 0) return contains(node.right, p, !horizontal);
+
+        return false;
     }
 
     /**
