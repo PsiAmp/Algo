@@ -125,10 +125,28 @@ public class KdTree {
      * draw all points to standard draw
      */
     public void draw() {
-        Iterator<Point2D> iterator = set.iterator();
-        while (iterator.hasNext()) {
-            iterator.next().draw();
+        draw(root, false);
+    }
+
+    private void draw(Node node, boolean horizontal) {
+        if (node == null) return;
+
+        // Draw line
+        if (horizontal) {
+            StdDraw.setPenColor(StdDraw.RED);
+        } else {
+            StdDraw.setPenColor(StdDraw.BLUE);
         }
+        StdDraw.setPenRadius();
+        StdDraw.line();
+
+        // Draw dot
+        StdDraw.setPenColor(StdDraw.BLACK);
+        StdDraw.setPenRadius(0.01);
+        node.p.draw();
+
+        draw(node.left, !horizontal);
+        draw(node.right, !horizontal);
     }
 
     /**
