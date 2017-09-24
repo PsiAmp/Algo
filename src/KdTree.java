@@ -3,6 +3,7 @@ import edu.princeton.cs.algs4.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 
 // TODO stub implementation copied from PointSET
 public class KdTree {
@@ -142,13 +143,13 @@ public class KdTree {
         return contains(root, p, false);
     }
 
-    private boolean contains(Node node, Point2D p, boolean orientaion) {
+    private boolean contains(Node node, Point2D p, boolean orientation) {
         if (node == null) return false;
         if (p.equals(node.p)) return true;
 
-        int cmp = getComparator(orientaion).compare(node.p, p);
-        if (cmp > 0) return contains(node.left, p, !orientaion);
-        if (cmp < 0) return contains(node.right, p, !orientaion);
+        int cmp = getComparator(orientation).compare(node.p, p);
+        if (cmp > 0) return contains(node.left, p, !orientation);
+        if (cmp < 0) return contains(node.right, p, !orientation);
 
         return false;
     }
@@ -194,13 +195,28 @@ public class KdTree {
      */
     public Iterable<Point2D> range(RectHV rect) {
         if (rect == null) throw new IllegalArgumentException();
-        ArrayList<Point2D> points = new ArrayList<>();
-//        Iterator<Point2D> iterator = set.iterator();
-//        while (iterator.hasNext()) {
-//            Point2D p = iterator.next();
-//            if (rect.contains(p)) points.add(p);
-//        }
+        List<Point2D> points = new ArrayList<Point2D>();
+        if (isEmpty()) return points;
+
+        gatherPoints(rect, root, VERTICAL, points);
+
         return points;
+    }
+
+    // TODO stupid method name, can't think about better one at 1 AM
+    private void gatherPoints(RectHV rect, Node node, boolean orientation, List<Point2D> points) {
+        if (node == null) return;
+
+        if (rect.contains(node.p)) points.add(node.p);
+
+        // TODO simplify
+        if (orientation == VERTICAL) {
+            if (node.p.x() > rect.xmin()) gatherPoints(rect, node.left, !orientation, points);
+            if (node.p.x() < rect.xmax()) gatherPoints(rect, node.right, !orientation, points);
+        } else {
+            if (node.p.y() > rect.ymin()) gatherPoints(rect, node.left, !orientation, points);
+            if (node.p.y() < rect.ymax()) gatherPoints(rect, node.right, !orientation, points);
+        }
     }
 
     /**
@@ -209,22 +225,13 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
+        if (p == null) throw new IllegalArgumentException();
+        if (isEmpty()) return null;
+
+        // TODO use square distance
+        double dist;
+
         return null;
-//        if (p == null) throw new IllegalArgumentException();
-//
-//        Iterator<Point2D> iterator = set.iterator();
-//        Point2D nearest = null;
-//        // TODO refactor this ugly code
-//        double distance = 2;
-//        while (iterator.hasNext()) {
-//            Point2D next = iterator.next();
-//            double dist = p.distanceTo(next);
-//            if (dist < distance) {
-//                nearest = next;
-//                distance = dist;
-//            }
-//        }
-//        return nearest;
     }
 
 public static void test() {
