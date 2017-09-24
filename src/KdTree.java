@@ -7,6 +7,9 @@ import java.util.Iterator;
 // TODO stub implementation copied from PointSET
 public class KdTree {
 
+    private final static boolean VERTICAL = false;
+    private final static boolean HORIZONTAL = true;
+
     private class HorizontalPointComparator implements Comparator<Point2D> {
         @Override
         public int compare(Point2D o1, Point2D o2) {
@@ -31,8 +34,9 @@ public class KdTree {
         private Node left;
         private Node right;
 
-        Node(Point2D p) {
+        Node(Point2D p, RectHV rect) {
             this.p = p;
+            this.rect = rect;
         }
     }
 
@@ -79,23 +83,51 @@ public class KdTree {
         if (p == null) throw new IllegalArgumentException();
         if (contains(p)) return;
 
-        root = insert(root, p, false);
+        if (isEmpty()) {
+            root = new Node(p, new RectHV(0, 0, 1, 1));
+        } else {
+            insert(root, p, VERTICAL);
+        }
 
         size++;
     }
 
-    private Node insert(Node node, Point2D point, boolean horizontal) {
-        if (node == null) return new Node(point);
 
-        int cmp = getComparator(horizontal).compare(node.p, point);
-        if (cmp > 0) node.left = insert(node.left, point, !horizontal);
-        else if (cmp < 0) node.right = insert(node.right, point, !horizontal);
+    private void insert(Node parentNode, Point2D point, boolean orientation) {
+        int cmp = getComparator(orientation).compare(parentNode.p, point);
+        Node next = cmp > 0 ? parentNode.left : parentNode.right;
 
-        return node;
+        if (next == null) {
+            RectHV rectHV = createRect(parentNode, orientation, cmp > 0);
+            System.out.println(rectHV.toString());
+            if (cmp > 0) {
+                parentNode.left = new Node(point, rectHV);
+            } else {
+                parentNode.right = new Node(point, rectHV);
+            }
+        } else {
+            insert(next, point, !orientation);
+        }
     }
 
-    private Comparator<Point2D> getComparator(boolean horizontal) {
-        return horizontal ? horizontalPointComparator : verticalPointComparator;
+    private RectHV createRect(Node node, boolean orientation, boolean isLeft) {
+        if (isLeft) {
+            double xMin = node.rect.xmin();
+            double yMin = node.rect.ymin();
+            double xMax = orientation == VERTICAL ? node.p.x() : node.rect.xmax();
+            double yMax = orientation == VERTICAL ? node.rect.ymax() : node.p.y();
+            return new RectHV(xMin, yMin, xMax, yMax);
+        } else {
+            double xMin = orientation == VERTICAL ? node.p.x() : node.rect.xmin();
+            double yMin = orientation == VERTICAL ? node.rect.ymin() : node.p.y();
+            double xMax = node.rect.xmax();
+            double yMax = node.rect.ymax();
+            return new RectHV(xMin, yMin, xMax, yMax);
+        }
+    }
+
+    private Comparator<Point2D> getComparator(boolean orientation) {
+        return orientation ? verticalPointComparator : horizontalPointComparator;
     }
 
     /**
@@ -110,13 +142,13 @@ public class KdTree {
         return contains(root, p, false);
     }
 
-    private boolean contains(Node node, Point2D p, boolean horizontal) {
+    private boolean contains(Node node, Point2D p, boolean orientaion) {
         if (node == null) return false;
         if (p.equals(node.p)) return true;
 
-        int cmp = getComparator(horizontal).compare(node.p, p);
-        if (cmp > 0) return contains(node.left, p, !horizontal);
-        if (cmp < 0) return contains(node.right, p, !horizontal);
+        int cmp = getComparator(orientaion).compare(node.p, p);
+        if (cmp > 0) return contains(node.left, p, !orientaion);
+        if (cmp < 0) return contains(node.right, p, !orientaion);
 
         return false;
     }
@@ -128,25 +160,31 @@ public class KdTree {
         draw(root, false);
     }
 
-    private void draw(Node node, boolean horizontal) {
+    private void draw(Node node, boolean orientation) {
         if (node == null) return;
 
-        // Draw line
-        if (horizontal) {
-            StdDraw.setPenColor(StdDraw.RED);
-        } else {
-            StdDraw.setPenColor(StdDraw.BLUE);
-        }
+        StdDraw.setPenColor(orientation ? StdDraw.BLUE : StdDraw.RED);
         StdDraw.setPenRadius();
-        StdDraw.line();
+
+        if (orientation == VERTICAL) {
+            double x = node.p.x();
+            double y1 = node.rect.ymin();
+            double y2 = node.rect.ymax();
+            StdDraw.line(x, y1, x, y2);
+        } else {
+            double x1 = node.rect.xmin();
+            double x2 = node.rect.xmax();
+            double y = node.p.y();
+            StdDraw.line(x1, y, x2, y);
+        }
 
         // Draw dot
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.setPenRadius(0.01);
         node.p.draw();
 
-        draw(node.left, !horizontal);
-        draw(node.right, !horizontal);
+        draw(node.left, !orientation);
+        draw(node.right, !orientation);
     }
 
     /**
@@ -157,11 +195,11 @@ public class KdTree {
     public Iterable<Point2D> range(RectHV rect) {
         if (rect == null) throw new IllegalArgumentException();
         ArrayList<Point2D> points = new ArrayList<>();
-        Iterator<Point2D> iterator = set.iterator();
-        while (iterator.hasNext()) {
-            Point2D p = iterator.next();
-            if (rect.contains(p)) points.add(p);
-        }
+//        Iterator<Point2D> iterator = set.iterator();
+//        while (iterator.hasNext()) {
+//            Point2D p = iterator.next();
+//            if (rect.contains(p)) points.add(p);
+//        }
         return points;
     }
 
@@ -171,43 +209,65 @@ public class KdTree {
      * @return
      */
     public Point2D nearest(Point2D p) {
-        if (p == null) throw new IllegalArgumentException();
+        return null;
+//        if (p == null) throw new IllegalArgumentException();
+//
+//        Iterator<Point2D> iterator = set.iterator();
+//        Point2D nearest = null;
+//        // TODO refactor this ugly code
+//        double distance = 2;
+//        while (iterator.hasNext()) {
+//            Point2D next = iterator.next();
+//            double dist = p.distanceTo(next);
+//            if (dist < distance) {
+//                nearest = next;
+//                distance = dist;
+//            }
+//        }
+//        return nearest;
+    }
 
-        Iterator<Point2D> iterator = set.iterator();
-        Point2D nearest = null;
-        // TODO refactor this ugly code
-        double distance = 2;
-        while (iterator.hasNext()) {
-            Point2D next = iterator.next();
-            double dist = p.distanceTo(next);
-            if (dist < distance) {
-                nearest = next;
-                distance = dist;
+public static void test() {
+    RectHV rect = new RectHV(0.0, 0.0, 1.0, 1.0);
+    StdDraw.enableDoubleBuffering();
+    KdTree kdtree = new KdTree();
+    while (true) {
+        if (StdDraw.mousePressed()) {
+            double x = StdDraw.mouseX();
+            double y = StdDraw.mouseY();
+            StdOut.printf("%8.6f %8.6f\n", x, y);
+            Point2D p = new Point2D(x, y);
+            if (rect.contains(p)) {
+                StdOut.printf("%8.6f %8.6f\n", x, y);
+                kdtree.insert(p);
+                StdDraw.clear();
+                kdtree.draw();
+                StdDraw.show();
             }
         }
-        return nearest;
+        StdDraw.pause(50);
     }
+}
 
     /**
      * unit testing of the methods (optional)
      * @param args
      */
     public static void main(String[] args) {
-
-        String filename = "c:\\Users\\konstantinko\\workspace\\Algo\\src\\kdtree\\circle10.txt";
+//test();
+        String filename = "d:\\Projects\\Algo\\src\\kdtree\\circle10.txt ";
         In in = new In(filename);
 
         StdDraw.enableDoubleBuffering();
 
         // initialize the data structures with N points from standard input
-        PointSET brute = new PointSET();
-        //KdTree kdtree = new KdTree();
+        //PointSET brute = new PointSET();
+        KdTree kdtree = new KdTree();
         while (!in.isEmpty()) {
             double x = in.readDouble();
             double y = in.readDouble();
             Point2D p = new Point2D(x, y);
-            //kdtree.insert(p);
-            brute.insert(p);
+            kdtree.insert(p);
         }
 
         double x0 = 0.0, y0 = 0.0;      // initial endpoint of rectangle
@@ -218,7 +278,7 @@ public class KdTree {
         StdDraw.clear();
         StdDraw.setPenColor(StdDraw.BLACK);
         StdDraw.setPenRadius(0.01);
-        brute.draw();
+        kdtree.draw();
         StdDraw.show();
 
         while (true) {
@@ -250,7 +310,7 @@ public class KdTree {
             StdDraw.clear();
             StdDraw.setPenColor(StdDraw.BLACK);
             StdDraw.setPenRadius(0.01);
-            brute.draw();
+            kdtree.draw();
 
             // draw the rectangle
             StdDraw.setPenColor(StdDraw.BLACK);
@@ -260,14 +320,14 @@ public class KdTree {
             // draw the range search results for brute-force data structure in red
             StdDraw.setPenRadius(0.03);
             StdDraw.setPenColor(StdDraw.RED);
-            for (Point2D p : brute.range(rect))
+            for (Point2D p : kdtree.range(rect))
                 p.draw();
 
             // draw the range search results for kd-tree in blue
             StdDraw.setPenRadius(.02);
             StdDraw.setPenColor(StdDraw.BLUE);
-//            for (Point2D p : kdtree.range(rect))
-//                p.draw();
+            for (Point2D p : kdtree.range(rect))
+                p.draw();
 
             StdDraw.show();
             StdDraw.pause(40);
