@@ -1,37 +1,33 @@
-import edu.princeton.cs.algs4.*;
+import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.RectHV;
+import edu.princeton.cs.algs4.StdDraw;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
-// TODO stub implementation copied from PointSET
 public class KdTree {
 
-    private final static boolean VERTICAL = false;
-    private final static boolean HORIZONTAL = true;
+    private static final boolean VERTICAL = false;
+    private static final boolean HORIZONTAL = true;
 
     private class HorizontalPointComparator implements Comparator<Point2D> {
         @Override
         public int compare(Point2D o1, Point2D o2) {
-            if (o1.x() > o2.x()) return 1;
-            if (o1.x() < o2.x()) return -1;
-            return 0;
+            return Double.compare(o1.x(), o2.x());
         }
     }
 
     private class VerticalPointComparator implements Comparator<Point2D> {
         @Override
         public int compare(Point2D o1, Point2D o2) {
-            if (o1.y() > o2.y()) return 1;
-            if (o1.y() < o2.y()) return -1;
-            return 0;
+            return Double.compare(o1.y(), o2.y());
         }
     }
 
     private static class Node {
-        private Point2D p;
-        private RectHV rect;
+        private final Point2D p;
+        private final RectHV rect;
         private Node left;
         private Node right;
 
@@ -49,7 +45,7 @@ public class KdTree {
     /**
      * construct an empty set of points
      */
-    public KdTree(){
+    public KdTree() {
 
     }
 
@@ -78,6 +74,7 @@ public class KdTree {
 
     /**
      * add the point to the set (if it is not already in the set)
+     *
      * @param p
      */
     public void insert(Point2D p) {
@@ -100,7 +97,6 @@ public class KdTree {
 
         if (next == null) {
             RectHV rectHV = createRect(parentNode, orientation, cmp > 0);
-            System.out.println(rectHV.toString());
             if (cmp > 0) {
                 parentNode.left = new Node(point, rectHV);
             } else {
@@ -133,6 +129,7 @@ public class KdTree {
 
     /**
      * does the set contain point p?
+     *
      * @param p
      * @return
      */
@@ -145,13 +142,12 @@ public class KdTree {
 
     private boolean contains(Node node, Point2D p, boolean orientation) {
         if (node == null) return false;
-        if (p.equals(node.p)) return true;
+
+        if (node.p.equals(p)) return true;
 
         int cmp = getComparator(orientation).compare(node.p, p);
         if (cmp > 0) return contains(node.left, p, !orientation);
-        if (cmp < 0) return contains(node.right, p, !orientation);
-
-        return false;
+        else return contains(node.right, p, !orientation);
     }
 
     /**
@@ -190,6 +186,7 @@ public class KdTree {
 
     /**
      * all points that are inside the rectangle (or on the boundary)
+     *
      * @param rect
      * @return
      */
@@ -220,124 +217,61 @@ public class KdTree {
     }
 
     /**
-     * a nearest neighbor in the set to point p; null if the set is empty
-     * @param p
+     * a nearest neighbor in the set to point point; null if the set is empty
+     *
+     * @param point
      * @return
      */
-    public Point2D nearest(Point2D p) {
-        if (p == null) throw new IllegalArgumentException();
+    public Point2D nearest(final Point2D point) {
+        if (point == null) throw new IllegalArgumentException();
         if (isEmpty()) return null;
 
-        // TODO use square distance
-        double dist;
-
-        return null;
+        return nearest(root, point, root.p);
     }
-
-public static void test() {
-    RectHV rect = new RectHV(0.0, 0.0, 1.0, 1.0);
-    StdDraw.enableDoubleBuffering();
-    KdTree kdtree = new KdTree();
-    while (true) {
-        if (StdDraw.mousePressed()) {
-            double x = StdDraw.mouseX();
-            double y = StdDraw.mouseY();
-            StdOut.printf("%8.6f %8.6f\n", x, y);
-            Point2D p = new Point2D(x, y);
-            if (rect.contains(p)) {
-                StdOut.printf("%8.6f %8.6f\n", x, y);
-                kdtree.insert(p);
-                StdDraw.clear();
-                kdtree.draw();
-                StdDraw.show();
+// TODO not optimal rewrite this
+    private Point2D nearest(Node node, Point2D queryPoint, Point2D closest) {
+        if (node != null) {
+            double minDistance = queryPoint.distanceSquaredTo(closest);
+            if (node.rect.distanceSquaredTo(queryPoint) < minDistance) {
+                if (node.p.distanceSquaredTo(queryPoint) < minDistance) {
+                    closest = node.p;
+                }
+                closest = nearest(node.left, queryPoint, closest);
+                closest = nearest(node.right, queryPoint, closest);
             }
         }
-        StdDraw.pause(50);
+        return closest;
     }
-}
 
     /**
      * unit testing of the methods (optional)
+     *
      * @param args
      */
     public static void main(String[] args) {
-//test();
-        String filename = "d:\\Projects\\Algo\\src\\kdtree\\circle10.txt ";
-        In in = new In(filename);
+        KdTree k = new KdTree();
+        k.insert(new Point2D(0.875 ,0.625));
+        k.insert(new Point2D(0.75 ,0.0));
+        k.insert(new Point2D(0.0 ,0.75));
+        k.insert(new Point2D(0.0 ,0.0));
+        k.insert(new Point2D(0.625 ,1.0));
+        k.insert(new Point2D(0.875 ,0.125));
+        k.insert(new Point2D(0.625 ,0.25));
+        k.insert(new Point2D(0.5 ,0.0));
+        k.insert(new Point2D(0.5 ,0.25));
+        k.insert(new Point2D(1.0 ,1.0));
+        k.insert(new Point2D(1.0 ,0.25));
+        k.insert(new Point2D(0.875 ,0.75));
+        k.insert(new Point2D(0.5 ,0.375));
+        k.insert(new Point2D(0.5 ,0.0));
+        k.insert(new Point2D(0.875 ,0.75));
+        k.insert(new Point2D(0.375 ,0.75));
+        k.insert(new Point2D(0.125 ,0.75));
+        k.insert(new Point2D(1.0 ,0.75));
+        k.insert(new Point2D(0.5 ,0.375));
+        k.insert(new Point2D(0.75 ,0.0));
 
-        StdDraw.enableDoubleBuffering();
-
-        // initialize the data structures with N points from standard input
-        //PointSET brute = new PointSET();
-        KdTree kdtree = new KdTree();
-        while (!in.isEmpty()) {
-            double x = in.readDouble();
-            double y = in.readDouble();
-            Point2D p = new Point2D(x, y);
-            kdtree.insert(p);
-        }
-
-        double x0 = 0.0, y0 = 0.0;      // initial endpoint of rectangle
-        double x1 = 0.0, y1 = 0.0;      // current location of mouse
-        boolean isDragging = false;     // is the user dragging a rectangle
-
-        // draw the points
-        StdDraw.clear();
-        StdDraw.setPenColor(StdDraw.BLACK);
-        StdDraw.setPenRadius(0.01);
-        kdtree.draw();
-        StdDraw.show();
-
-        while (true) {
-
-            // user starts to drag a rectangle
-            if (StdDraw.mousePressed() && !isDragging) {
-                x0 = StdDraw.mouseX();
-                y0 = StdDraw.mouseY();
-                isDragging = true;
-                continue;
-            }
-
-            // user is dragging a rectangle
-            else if (StdDraw.mousePressed() && isDragging) {
-                x1 = StdDraw.mouseX();
-                y1 = StdDraw.mouseY();
-                continue;
-            }
-
-            // mouse no longer pressed
-            else if (!StdDraw.mousePressed() && isDragging) {
-                isDragging = false;
-            }
-
-
-            RectHV rect = new RectHV(Math.min(x0, x1), Math.min(y0, y1),
-                    Math.max(x0, x1), Math.max(y0, y1));
-            // draw the points
-            StdDraw.clear();
-            StdDraw.setPenColor(StdDraw.BLACK);
-            StdDraw.setPenRadius(0.01);
-            kdtree.draw();
-
-            // draw the rectangle
-            StdDraw.setPenColor(StdDraw.BLACK);
-            StdDraw.setPenRadius();
-            rect.draw();
-
-            // draw the range search results for brute-force data structure in red
-            StdDraw.setPenRadius(0.03);
-            StdDraw.setPenColor(StdDraw.RED);
-            for (Point2D p : kdtree.range(rect))
-                p.draw();
-
-            // draw the range search results for kd-tree in blue
-            StdDraw.setPenRadius(.02);
-            StdDraw.setPenColor(StdDraw.BLUE);
-            for (Point2D p : kdtree.range(rect))
-                p.draw();
-
-            StdDraw.show();
-            StdDraw.pause(40);
-        }
+        System.out.println(k.contains(new Point2D(0.875, 0.125)));
+        System.out.println(k.size());
     }
 }
